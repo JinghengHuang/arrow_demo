@@ -5,7 +5,7 @@ import sys
 import yaml
 # Run all servers in multiprocessing
 
-class Server():
+class GatewayServer():
     def __init__(self):
         self.port = 8000
         self.grpc_port = 8100
@@ -43,9 +43,14 @@ class Server():
                     reload=True, 
                     log_level="info",
                     access_log=True)
+        
+    def run_server_multiprocessing(self):
+        server_thread = multiprocessing.Process(target=self.run_server, daemon=False)
+        server_thread.start()
+        server_thread.join()
 
 # Run script to start http gateway server
 if __name__ == "__main__":
-    server = Server()
+    server = GatewayServer()
     server.config_loader()
     server.run_server()

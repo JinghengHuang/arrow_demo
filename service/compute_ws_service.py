@@ -12,7 +12,7 @@ from utils.mat_parser import load_model_from_mat
 class WsComputeService(BaseService):
     def __init__(self):
         self.gRPC_ip = "127.0.0.1"
-        self.gRPC_port = 8815
+        self.gRPC_port = 8101
         super().__init__()
     
                     

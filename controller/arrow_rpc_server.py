@@ -6,6 +6,8 @@ from service.optimization_service.solver_factory import SolverFactory
 import logging
 import sys
 import time
+from utils.dict_to_pa_table import dict_to_pa_table, unpack_pa_table_dict
+
 solver_factory = SolverFactory()
 logger = logging.getLogger(__name__)
 
@@ -17,9 +19,6 @@ class FlightServer(pyarrow.flight.FlightServerBase):
         self._location = location
         self._repo = repo
         self._tables:dict = {}
-        
-    def set_location(self, location:str) -> None:
-        self._location = location
 
     def _make_flight_info(self, dataset):
         table = self._tables[dataset]
@@ -47,11 +46,17 @@ class FlightServer(pyarrow.flight.FlightServerBase):
         if dataset.find(":") > 0:
             problem = dataset.split(":")[0]
             key = dataset.split(":")[1]
-        try:
-            self._tables[problem][key] = data_table
-        except KeyError:
-            self._tables[problem] = {}
-            self._tables[problem][key] = data_table
+            try:
+                if problem in self._tables:
+                    self._tables[problem][key] = data_table
+                else:
+                    self._tables[problem] = {}
+                    self._tables[problem][key] = data_table
+            except KeyError:
+                self._tables[problem] = {}
+                self._tables[problem][key] = data_table
+        else:
+            self._tables[dataset] = data_table
 
     def do_get(self, context, ticket):
         ticket_str:str = ticket.ticket.decode()
@@ -78,30 +83,30 @@ class FlightServer(pyarrow.flight.FlightServerBase):
 
     # Drop all dataset related to a task
     def do_drop_dataset(self, dataset):
-        self._tables[dataset] = {}
+        self._tables[dataset] = None
     # Execute a solver
     def do_solver(self, param:str):
         params = param.split(',')
         dataset = params[1]
         solver_name = params[2]
         # get data from memory
-        input_params = self._tables.get(dataset)
+        input_params:dict = unpack_pa_table_dict(self._tables.get(dataset))
         # get solver
         solver = solver_factory.get_solver(solver_name)
         # run solver and get result in form of pa table
         result = solver.run(input_params)
-        # print results
         logger.info(result)
-        return pa.flight.RecordBatchStream(result)
+        result_table = dict_to_pa_table(result)
+        return pa.flight.RecordBatchStream(result_table)
 
 def grpc_serve_addr(ipaddr:str, port:int, ext_logger) -> None:
-    server = FlightServer()
     logger = ext_logger
     if ipaddr is not None and port is not None:
-        server.set_location(f"grpc://{ipaddr}:{port}")
+        server = FlightServer(location=f"grpc://{ipaddr}:{port}")
+    else:
+        server = FlightServer()
     server._repo.mkdir(exist_ok=True)
     logger.info("Server running at " + server._location)
-    time.sleep(5)
     server.serve()
 # Use when run standalone
 def grpc_serve() -> None:

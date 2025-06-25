@@ -7,11 +7,12 @@ import json
 from pyarrow import json as pajson
 import pyarrow.flight
 from utils.mat_parser import load_model_from_mat
+from utils.dict_to_pa_table import dict_to_pa_table
 
 class GrpcComputeService(BaseService):
     def __init__(self):
         self.gRPC_ip = "127.0.0.1"
-        self.gRPC_port = 8815
+        self.gRPC_port = 8101
         super().__init__()
     
                     
@@ -19,21 +20,14 @@ class GrpcComputeService(BaseService):
         client = pa.flight.connect(f"grpc://{self.gRPC_ip}:{self.gRPC_port}")
         # Upload a new dataset(test data)
         data = load_model_from_mat(model_bin)
-        ipc = data.to_pydict()
-        for k, v in ipc.items():
-            upload_descriptor = pa.flight.FlightDescriptor.for_path(f"cobra_lp_params:{k}")
-            value = v
-            # Convert pa array to batchTable
-            if isinstance(v, pa.Array):
-            # new_stream() requires a schema, and pa.Array alone does not have a schema — only RecordBatch or Table do.
-                value = pa.RecordBatch.from_pydict({k: v})
-            writer, reader = client.do_put(upload_descriptor, value.schema)
-            if isinstance(value, pa.RecordBatch):
-                writer.write_batch(value)
-            elif isinstance(value, pa.Table):
-                writer.write_table(value)
-            writer.close()
-
+        ipc = data.__dict__
+        # Convert to pyTable for shipping via Flight
+        data_table = dict_to_pa_table(ipc)
+        
+        upload_descriptor = pa.flight.FlightDescriptor.for_path(f"cobra_lp_params")
+        writer, reader = client.do_put(upload_descriptor, data_table.schema)
+        writer.write_table(data_table)
+        writer.close()
         # Compute the model and drop dataset from gRPC server
         result_reader = client.do_get(pa.flight.Ticket(b"do_solver,cobra_lp_params,pyomo.cobra_lp"))
         client.do_action(pa.flight.Action("drop_dataset", "cobra_lp_params".encode('utf-8')))

@@ -2,7 +2,7 @@ import pyarrow as pa
 import pyarrow.flight
 
 # only used for testing
-client = pa.flight.connect("grpc://127.0.0.1:8815")
+client = pa.flight.connect("grpc://127.0.0.1:8101")
 # Upload a new dataset
 data_table = pa.table(
     [['hammer', 'wrench', 'screwdriver', 'towel'], [8, 3, 6, 11], [5, 7, 4, 3], [14,0,0,0]],

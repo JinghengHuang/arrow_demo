@@ -1,11 +1,11 @@
-import uvicorn, multiprocessing
+import multiprocessing
 from controller.arrow_rpc_server import grpc_serve_addr
 import logging
 import sys
 import yaml
 # Run all servers in multiprocessing
 
-class Server():
+class EngineServer():
     def __init__(self):
         self.port = 8000
         self.grpc_port = 8100
@@ -48,6 +48,6 @@ class Server():
 
 # Run script to start engine service
 if __name__ == "__main__":
-    server = Server()
+    server = EngineServer()
     server.config_loader()
     server.start_engine_services()

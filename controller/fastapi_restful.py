@@ -25,14 +25,18 @@ async def compute(model: Annotated[UploadFile, File(), None] = None,
             solver: Annotated[str, None] = Form(...)):
     contents = await model.read()
     # handle model saving logic
-    endpoint.compute(payload={
+    result = endpoint.compute(payload={
         "model_name": model_name,
         "engine": engine,
         "solver": solver,
         "model": contents
     })
+    result = result.to_pydict()
     # handle compute logic
-    return {"message": f"Computing model {model_name} successful"}
+    return {
+        "message": f"Computing model {model_name} successful",
+        "result": result
+    }
 
 
 @app.post("/saveModel")

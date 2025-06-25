@@ -2,6 +2,7 @@
 import pyarrow as pa
 import pyarrow.ipc as ipc
 import requests
+import time
 
 def mat_test():
     # Upload the .mat file to server
@@ -15,5 +16,12 @@ def mat_test():
         "engine": "pyomo",
         "solver": "cobra_lp"
     }
+    
+    pre = time.time()
     req = requests.post(url=url, files=files, data=params)
     print(req.content)
+    post = time.time()
+    diff = post - pre
+    print(f"Pre request: {pre}")
+    print(f"Post request: {post}")
+    print(f"Time diff: {diff}")
