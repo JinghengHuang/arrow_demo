@@ -16,14 +16,15 @@ class GrpcComputeService(BaseService):
         super().__init__()
     
                     
-    def compute(self, model_bin = None) -> pa.Table:
+    def compute(self, model_bin = None, solver = None) -> pa.Table:
         client = pa.flight.connect(f"grpc://{self.gRPC_ip}:{self.gRPC_port}")
         # Upload a new dataset(test data)
+        # Not as a COO sparse matrix
         data = load_model_from_mat(model_bin)
         ipc = data.__dict__
+        data_table = ipc | solver.__dict__
         # Convert to pyTable for shipping via Flight
         data_table = dict_to_pa_table(ipc)
-        
         upload_descriptor = pa.flight.FlightDescriptor.for_path(f"cobra_lp_params")
         writer, reader = client.do_put(upload_descriptor, data_table.schema)
         writer.write_table(data_table)
