@@ -14,7 +14,8 @@ def mat_test():
     params = {
         "model_name": "e_coli_core",
         "engine": "pyomo",
-        "solver": "cobra_lp"
+        "solver": "cobra_lp",
+        "solver_name": "glpk"
     }
     
     pre = time.time()

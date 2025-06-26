@@ -1,83 +1,113 @@
-"""
-    LPproblem(S, b, c, lb, ub, osense, csense, rxns, mets)
+from pyomo.environ import *
+import numpy as np
+from collections import defaultdict
+import pyarrow.compute as pc
 
-General type for storing an LP problem which contains the following fields:
 
-- `S`:              LHS matrix (m x n)
-- `b`:              RHS vector (m x 1)
-- `c`:              Objective coefficient vector (n x 1)
-- `lb`:             Lower bound vector (n x 1)
-- `ub`:             Upper bound vector (n x 1)
-- `osense`:         Objective sense (scalar; -1 ~ "max", +1 ~ "min")
-- `csense`:         Constraint senses (m x 1, 'E' or '=', 'G' or '>', 'L' ~ '<')
-- `solver`:         A `::SolverConfig` object that contains a valid `handle` to the solver
+class SolverConfig:
+    def __init__(self, name, handle=None):
+        self.name = name.upper()
+        self.handle = handle
 
-"""
-import pyomo.environ as pyo
-import pyarrow as pa
-from service.optimization_service.solver import BaseSolver
 
-class CobraLP(BaseSolver):
-    def __init__(self):
-        self.model = {}
-        super().__init__()
-        
-        
-    def run(self, params:dict) -> dict:
-        # Convert the data into an model acceptable format
-        for k, v in params.items():
-            self.model[k] = v
-        
-        # Send the data to model
-        # Get results, for now just use glpk
-        return self.solve_cobra_lp(self.model, {"solverName": "glpk"})
-
-    def solve_cobra_lp(self, model, solver):
-        model_dict = self.buildCobraLP(model, solver)
-        resdict = self.solvelp(model_dict.model, model_dict.x)
-
-        if resdict.status == "Optimal":
-            resdict.objval = model.osense * resdict.objval
-        return resdict
-    
-    def buildCobraLP(self, model, solver):
-        if solver.handle != -1:
-            # prepare the csense vector when letters instead of symbols are used
-            for i in range(len(model.csense)):
-                if model.csense[i] == 'E':
-                    model.csense[i] = '='
-                if model.csense[i] == 'G':
-                    model.csense[i] = '>'
-                if model.csense[i] == 'L':
-                    model.csense[i] = '<'
-            return self.buildlp(model.osense * model.c, model.S, model.csense, model.b, model.lb, model.ub, solver.handle)
+class LPProblem:
+    def __init__(self, S, b, c, lb, ub, osense, csense):
+        if isinstance(S, dict) and all(k in S for k in ("row", "col", "data")):
+            # 处理稀疏字典格式，直接保存
+            self.S = sparse_dict_to_dense(S)
         else:
-            raise ValueError("The solver is not supported. Please set solver name to one the supported solvers.")
-    
-    
-    def solvelp(self, opt, model, x):
-        result = opt.solve(model)
-        return result
-        
-    def buildlp(self, c, A, sense, b, l, u, solver):
-        N = len(c)
-        opt = pyo.SolverFactory(solver["solverName"])
-        model = pyo.ConcreteModel()
-        model.x = pyo.Var( range(1, N), bounds=(l, u) )
+            # 假设是可转换为 NumPy 数组的稠密矩阵
+            self.S = np.array(S)
+        self.n_mets, self.n_rxns = self.S.shape
 
-        model.obj = pyo.Objective(
-            expr = min( c * model.x ), 
-            sense = pyo.maximize )
-        eq_rows = sense == '='
-        ge_rows = sense == '>'
-        le_rows = sense == '<'
-        model.con_1 = pyo.Constraint( expr = A[eq_rows] * model.x = b[eq_rows])
-        model.con_2 = pyo.Constraint( expr = A[ge_rows] * model.x = b[ge_rows])
-        model.con_3 = pyo.Constraint( expr = A[le_rows] * model.x = b[le_rows])
+        self.b = np.array(b)
+        self.c = np.array(c)
+        self.lb = np.array(lb)
+        self.ub = np.array(ub)
+        if osense == 'max':
+            self.osense = 1
+        elif osense == 'min':
+            self.osense = -1
+        self.csense = np.array(csense)
+        self.model = None
+        self.solution = None
+        self.objective_value = None
+        self.status = None
 
-        return {
-            "opt": opt, 
-            "model":model, 
-            "x": model.x, 
-            "c": c
-        }
+    def build_lp(self, solver: SolverConfig):
+        num_vars = len(self.c)
+        num_cons = len(self.b)
+
+        model = ConcreteModel()
+        model.I = RangeSet(0, num_vars - 1)
+        model.J = RangeSet(0, num_cons - 1)
+
+        model.x = Var(model.I, domain=Reals)
+
+        # Bounds
+        for i in model.I:
+            model.x[i].setlb(self.lb[i])
+            model.x[i].setub(self.ub[i])
+
+        # Objective
+        if self.osense == -1:
+            model.obj = Objective(expr=sum(self.c[i] * model.x[i] for i in model.I), sense=maximize)
+        else:
+            model.obj = Objective(expr=sum(self.c[i] * model.x[i] for i in model.I), sense=minimize)
+
+        # Constraints
+        model.constraints = ConstraintList()
+        # S is now always dense 2D array
+        for j in range(num_cons):
+            expr = sum(self.S[j][i] * model.x[i] for i in range(num_vars))
+            sense = self.csense[j]
+            if sense in ['=', 'E']:
+                model.constraints.add(expr == self.b[j])
+            elif sense in ['<', 'L']:
+                model.constraints.add(expr <= self.b[j])
+            elif sense in ['>', 'G']:
+                model.constraints.add(expr >= self.b[j])
+            else:
+                raise ValueError(f"Invalid constraint sense: {sense}")
+
+        self.model = model
+        self.solver = solver
+
+    def solve(self):
+        if self.model is None or self.solver is None:
+            raise RuntimeError("Model not built or solver not assigned.")
+
+        opt = SolverFactory(self.solver.name.lower())
+        result = opt.solve(self.model, tee=False)
+
+        self.status = str(result.solver.termination_condition)
+        if self.status.lower() == "optimal":
+            self.solution = [value(self.model.x[i]) for i in self.model.I]
+            self.objective_value = value(self.model.obj)
+            if self.osense == -1:
+                self.objective_value = -self.objective_value
+        else:
+            self.solution = None
+            self.objective_value = None
+
+
+def change_cobra_solver(name: str, params=None, print_level=1) -> SolverConfig:
+    name = name.upper()
+    known_solvers = ["GLPK", "CPLEX", "GUROBI", "HIGHS"]
+    if name not in known_solvers:
+        raise ValueError(f"Unsupported solver: {name}")
+    return SolverConfig(name)
+
+
+def sparse_dict_to_dense(S_dict, shape=None):
+    row = S_dict["row"]
+    col = S_dict["col"]
+    data = S_dict["data"]
+    if shape is None:
+        n_row = int(pc.max(row).as_py()) + 1 if row else 0
+        n_col = int(pc.max(col).as_py()) + 1 if col else 0
+        shape = (n_row, n_col)
+    dense = np.zeros(shape)
+    for r, c, v in zip(row, col, data):
+        dense[r, c] = v
+    return dense

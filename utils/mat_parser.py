@@ -42,7 +42,6 @@ def load_model_from_mat(file_bytes: bytes) -> 'EngineModel':
     else:
         osense = "max"  # default to maximization
         
-    # Convert S matrix to Arrow RecordBatch in COO format
     S_coo = S.tocoo()
     S = pa.RecordBatch.from_arrays(
         [
@@ -55,7 +54,6 @@ def load_model_from_mat(file_bytes: bytes) -> 'EngineModel':
             ('data', pa.float64())
         ])
     )
-    
     # convert to PyArrow arrays
     b = pa.array(b, type=pa.float64())
     c = pa.array(c, type=pa.float64())
