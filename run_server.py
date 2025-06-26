@@ -1,5 +1,5 @@
 import uvicorn, multiprocessing
-from controller.arrow_rpc_server import grpc_serve_addr
+from service.optimization_service.arrow_rpc_server import grpc_serve_addr
 import logging
 import sys
 import yaml
