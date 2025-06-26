@@ -1,8 +1,6 @@
 import pyarrow as pa
-from pyarrow import ipc
 import pyarrow.compute as pc
-import io
-from typing import Union
+
 
 class EngineModel:
     def __init__(
@@ -32,37 +30,7 @@ class EngineModel:
         self.lb = lb          # Lower bounds
         self.ub = ub          # Upper bounds
         self.osense = osense  # Objective sense (e.g., "max" or "min")
-        self.csense = csense  # Constraint senses (e.g., ["E", "L", "G"])
-
-    @staticmethod
-    def _bytes_helper(obj: Union[pa.Array, pa.RecordBatch, pa.Table]) -> bytes:
-        """
-        Helper method to convert a PyArrow object with schema(RecordBatch or Table)
-        into Arrow IPC bytes using pyarrow.ipc.new_stream().
-        https://arrow.apache.org/docs/python/generated/pyarrow.ipc.new_stream.html#pyarrow.ipc.new_stream
-        """
-        sink = io.BytesIO()
-
-        if isinstance(obj, pa.Scalar):
-            batch = pa.record_batch({"scalar": pa.array([obj])})
-        elif isinstance(obj, pa.Array):
-            # new_stream() requires a schema, and pa.Array alone does not have a schema — only RecordBatch or Table do.
-            batch = pa.RecordBatch.from_pydict({"field": obj})
-        elif isinstance(obj, pa.RecordBatch):
-            batch = obj
-        elif isinstance(obj, pa.Table):
-            # NOTE: Currently not using table so assuming single batch for simplicity
-            batch = obj.to_batches()[0] 
-        else:
-            print(f"Unsupported type for Arrow serialization: {type(obj)}")
-            print(f"Object: {obj}")
-            raise TypeError("Unsupported type for Arrow serialization")
-
-        # Serialize the batch into IPC stream format
-        with ipc.new_stream(sink, batch.schema) as writer:
-            writer.write(batch)
-
-        return sink.getvalue()       
+        self.csense = csense  # Constraint senses (e.g., ["E", "L", "G"])     
         
 
     def to_pydict(self):
@@ -84,7 +52,9 @@ class EngineModel:
         nrow = int(pc.max(row).as_py()) + 1
         ncol = int(pc.max(col).as_py()) + 1
 
-        # 封装为一个 RecordBatch
+        # Create a RecordBatch for the sparse matrix S
+        # with columns: "row", "col", "data"
+        # and a RecordBatch for the shape of S with "nrow", "ncol
         S_batch = pa.record_batch({
             "row": row,
             "col": col,
@@ -96,16 +66,26 @@ class EngineModel:
             "ncol": pa.array([ncol], type=pa.int64())
         })
 
-        # 各字段转换为 Arrow IPC 二进制
+        # Convert all other components to Arrow IPC bytes
+        # return {
+        #     "S": pa_to_ipc(S_batch),
+        #     "lb": pa_to_ipc(self.lb),
+        #     "ub": pa_to_ipc(self.ub),
+        #     "b": pa_to_ipc(self.b),
+        #     "c":  pa_to_ipc(self.c),
+        #     "osense": pa_to_ipc(self.osense),
+        #     "csense": pa_to_ipc(self.csense),
+        #     "S_shape": pa_to_ipc(S_shape_batch)
+        # }
         return {
-            "S": self._bytes_helper(S_batch),
-            "lb": self._bytes_helper(self.lb),
-            "ub": self._bytes_helper(self.ub),
-            "b": self._bytes_helper(self.b),
-            "c":  self._bytes_helper(self.c),
-            "osense": self._bytes_helper(self.osense),
-            "csense": self._bytes_helper(self.csense),
-            "S_shape": self._bytes_helper(S_shape_batch)
+            "S": S_batch,
+            "S_shape": S_shape_batch,
+            "b": self.b,
+            "c": self.c,
+            "lb": self.lb,
+            "ub": self.ub,
+            "osense": self.osense,
+            "csense": self.csense
         }
     
         

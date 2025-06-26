@@ -1,4 +1,6 @@
 import pyarrow as pa
+    
+    
 def dict_to_pa_table(data:dict) -> pa.Table:
     """A util function to convert any dictionary data to pyArrow Table data, each column with a length of 1 which contains the data.
 

@@ -3,6 +3,7 @@ from objects.util.response import Response
 from typing import List, Dict, Optional, Union
 from utils.mat_parser import load_model_from_mat
 from objects.engine_model import EngineModel
+from objects.solver_config import SolverConfig
 import service
 from service.service_factory import ServiceFactory
 """
@@ -61,7 +62,13 @@ class Endpoint:
         """
         if payload['model'] is not None:
             service = self.service_factory.create_service(payload["engine"])
-            result = service.compute(payload['model'])
+            params_str = payload.get("solver_params", None)
+            solver = SolverConfig(
+                solver_name=payload["solver_name"],
+                solver_type=payload["solver_type"],
+                params= json.loads(params_str) if params_str else None
+            )           
+            result = service.compute(payload['model'], solver)
         return result
 
     def compute_cobra(self, payload: Dict) -> Dict:
