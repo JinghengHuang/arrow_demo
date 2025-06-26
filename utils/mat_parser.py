@@ -24,6 +24,7 @@ def load_model_from_mat(file_bytes: bytes) -> 'EngineModel':
     ub = np.array(_cell_to_float_list(model_data['ub'][0, 0]))
     c = np.array(_cell_to_float_list(model_data['c'][0, 0]))
     b = np.array(_cell_to_float_list(model_data['b'][0, 0]))
+    print([len(lb), len(ub), len(c), len(b)])
     rxns = _cell_to_str_list(model_data['rxns'][0, 0])
     mets = _cell_to_str_list(model_data['mets'][0, 0])
     # csense is a list of constraint senses, e.g., ["E", "L", "G"]
@@ -41,7 +42,6 @@ def load_model_from_mat(file_bytes: bytes) -> 'EngineModel':
     else:
         osense = "max"  # default to maximization
         
-    # Convert S matrix to Arrow RecordBatch in COO format
     S_coo = S.tocoo()
     S = pa.RecordBatch.from_arrays(
         [
@@ -54,7 +54,6 @@ def load_model_from_mat(file_bytes: bytes) -> 'EngineModel':
             ('data', pa.float64())
         ])
     )
-    
     # convert to PyArrow arrays
     b = pa.array(b, type=pa.float64())
     c = pa.array(c, type=pa.float64())

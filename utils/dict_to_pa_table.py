@@ -23,8 +23,8 @@ def dict_to_pa_table(data:dict) -> pa.Table:
         elif isinstance(v, pa.Scalar):
             value = v.as_py()
         pa_arrays.append(pa.array([value]))
-        
-    return pa.Table.from_arrays(pa_arrays, names=names)
+    result = pa.Table.from_arrays(pa_arrays, names=names)
+    return result
 
 def unpack_pa_table_dict(data:pa.Table) -> dict:
     # get data from memory
