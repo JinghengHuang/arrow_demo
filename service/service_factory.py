@@ -1,7 +1,7 @@
 from service.base_service import BaseService
 import service
 import service.compute_grpc_service
-import service.compute_ws_service
+import service.compute_julia_service
 class ServiceFactory():
     """
     Service factory class, build service object based on parameter
@@ -10,7 +10,7 @@ class ServiceFactory():
     def __init__(self):
         self._service_map = {
             "pyomo": service.compute_grpc_service.GrpcComputeService(),
-            "julia": service.compute_ws_service.WsComputeService(),
+            "julia": service.compute_julia_service.JuliaComputeService(),
         }
         pass
     

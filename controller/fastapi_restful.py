@@ -22,13 +22,17 @@ def read_item(item_id: int, q: Union[str, None] = None):
 async def compute(model: Annotated[UploadFile, File(), None] = None,
             model_name: Annotated[str, None] = Form(...),
             engine: Annotated[str, None] = Form(...),
-            solver: Annotated[str, None] = Form(...)):
+            solver_name: Annotated[str, None] = Form(...),
+            solver_type: Annotated[str, None] = Form("LP"),
+            solver_params: Annotated[Optional[str], Form()] = None):
     contents = await model.read()
     # handle model saving logic
     result = endpoint.compute(payload={
         "model_name": model_name,
         "engine": engine,
-        "solver": solver,
+        "solver_name": solver_name,
+        "solver_type": solver_type,
+        "solver_params": solver_params,
         "model": contents
     })
     result = result.to_pydict()

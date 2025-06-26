@@ -99,37 +99,32 @@ data_dict = read_data_from_client(client)
 ```
 """
 function read_data_from_client(client)
-    data_dict = Dict{Symbol,Arrow.Table}()
+    tables = Dict{Symbol,Arrow.Table}()
     while true
         header = read(client, UInt32)  # Read the fixed-length header
         data_length = Int(header)
-
-        if data_length == 0
-            println("Received 'END' marker, processing data...")
-            break
-        end
+        println("Received data length: ", data_length)
 
         data = read(client, data_length)
+
 
         # Deserialize Arrow IPC data
         buf = IOBuffer(data)
         table = Arrow.Table(buf)
 
-        # Extract the key from the table's metadata
-        metadata = Arrow.getmetadata(table)
-        # println("Metadata: ", metadata)
-        if haskey(metadata, "name")
-            key = Symbol(metadata["name"])
-            data_dict[key] = table
-            # println("Deserialized Arrow IPC data with key: ", key)
-            # println()
-        else
-            println("No 'name' metadata found, skipping table")
+        # keys 
+        println("Received table with keys: ", keys(table))
+
+        for key in keys(table)
+            println("========= Field: ", key)
+            column = table[key][1]
+            tables[key] = column
+            # println("Received column with key":keys(column))
         end
     end
     println("Received all data from client")
     println()
-    return data_dict
+    return tables
 end
 
 """
@@ -189,6 +184,7 @@ lpProblem = form_model(data)
 """
 function form_model(data)
     # Extract and convert the data
+    println("Forming the LP problem from the provided data...")
     S_data = data[:S]
     metadata = Arrow.getmetadata(S_data)
     dimensions_str = metadata["dimensions"]
