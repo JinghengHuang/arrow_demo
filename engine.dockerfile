@@ -1,6 +1,6 @@
 # Use an official Python runtime as a parent image
 FROM ubuntu:latest
-
+SHELL ["/bin/bash", "-c"]
 # Set environment variables for configuration
 RUN apt-get update && \
     apt-get install -y \
@@ -48,10 +48,10 @@ RUN update-alternatives --install /usr/bin/python python /usr/local/bin/python3.
 
 # install julia
 # Set JULIA version
-ENV JULIA_VERSION=1.10.3
+ENV JULIA_VERSION=1.11.5
 
 # Download and install Julia
-RUN wget https://julialang-s3.julialang.org/bin/linux/x64/1.10/julia-$JULIA_VERSION-linux-x86_64.tar.gz && \
+RUN wget https://julialang-s3.julialang.org/bin/linux/x64/1.11/julia-$JULIA_VERSION-linux-x86_64.tar.gz && \
     tar -xvzf julia-$JULIA_VERSION-linux-x86_64.tar.gz && \
     mv julia-$JULIA_VERSION /opt/julia && \
     ln -s /opt/julia/bin/julia /usr/local/bin/julia && \
@@ -71,9 +71,9 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 # Install any needed packages specified in requirements.txt 
 RUN pip install --no-cache-dir -r requirements.txt
 
-RUN cd ./service/optimization_service/julia
-RUN julia -e 'using Pkg; Pkg.instantiate()'
-RUN cd /usr/src/app
+RUN julia --project="." -e 'using Pkg; Pkg.add("JuMP", preserve=PRESERVE_DIRECT);'
+
+RUN julia --project="." -e "using Pkg; Pkg.activate('Project.toml'); Pkg.instantiate()"
 
 # Make port 80 available to the world outside this container (Optional, only for web apps)
 EXPOSE 8101

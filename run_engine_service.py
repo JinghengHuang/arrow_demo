@@ -35,7 +35,7 @@ class EngineServer():
     
     
     def run_julia_server(self):
-        os.system('julia --project=./service/optimization_service/julia ./service/optimization_service/julia/engine.jl')
+        os.system('julia --project=. ./service/optimization_service/julia/engine.jl')
     
     def run_grpc_server(self):
         logger = self.setup_custom_logger(f"worker_grpc")
