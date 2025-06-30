@@ -13,8 +13,10 @@ class SolverConfig:
 class LPProblem:
     def __init__(self, S, b, c, lb, ub, osense, csense):
         if isinstance(S, dict) and all(k in S for k in ("row", "col", "data")):
+            # Convert to dense
             self.S = sparse_dict_to_dense(S)
         else:
+            # If it's dense already
             self.S = np.array(S)
         self.n_mets, self.n_rxns = self.S.shape
 
