@@ -13,10 +13,10 @@ class SolverConfig:
 class LPProblem:
     def __init__(self, S, b, c, lb, ub, osense, csense):
         if isinstance(S, dict) and all(k in S for k in ("row", "col", "data")):
-            # 处理稀疏字典格式，直接保存
+            # Convert to dense
             self.S = sparse_dict_to_dense(S)
         else:
-            # 假设是可转换为 NumPy 数组的稠密矩阵
+            # If it's dense already
             self.S = np.array(S)
         self.n_mets, self.n_rxns = self.S.shape
 
