@@ -29,8 +29,8 @@ mutable struct LPproblem
     ub::Array{Float64,1}
     osense::Int8
     csense::Array{Char,1}
-    rxns::Array{String,1}
-    mets::Array{String,1}
+    # rxns::Array{String,1}
+    # mets::Array{String,1}
 end
 
 
@@ -80,15 +80,22 @@ julia> model, x, c = buildlp(c, A, sense, b, l, u, solver)
 """
 
 function buildlp(c, A, sense, b, l, u, solver)
-    N = length(c)
-    model = Model(solver)
-    x = @variable(model, l[i] <= x[i=1:N] <= u[i])
-    @objective(model, Min, c' * x)
-    eq_rows, ge_rows, le_rows = sense .== '=', sense .== '>', sense .== '<'
-    @constraint(model, A[eq_rows, :] * x .== b[eq_rows])
-    @constraint(model, A[ge_rows, :] * x .>= b[ge_rows])
-    @constraint(model, A[le_rows, :] * x .<= b[le_rows])
-    return model, x, c
+    try
+        N = length(c)
+        model = Model(solver)
+        x = @variable(model, l[i] <= x[i=1:N] <= u[i])
+        @objective(model, Min, c' * x)
+        eq_rows, ge_rows, le_rows = sense .== '=', sense .== '>', sense .== '<'
+        @constraint(model, A[eq_rows, :] * x .== b[eq_rows])
+        @constraint(model, A[ge_rows, :] * x .>= b[ge_rows])
+        @constraint(model, A[le_rows, :] * x .<= b[le_rows])
+        return model, x, c
+    catch e
+        rethrow(e)
+        # printout error e details
+        println("Error building LP model with JuMP: ", e)
+
+    end
 end
 
 #-------------------------------------------------------------------------------------------

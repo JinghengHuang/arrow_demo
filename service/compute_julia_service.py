@@ -36,12 +36,19 @@ class JuliaComputeService(BaseService):
             client_socket.sendall(sink.getvalue())
             print("Sent 'END' marker to Julia")
 
-            pass
-            # while True:
-            #     # Receive the response from the Julia service
-            #     response = client_socket.recv(4096)
-            #     if not response:
-            #         break
-            #     print(f"<<< Received response from Julia service: {response}")
-            # # Receive the result from the Julia service
-            # return response
+            
+            # Receive the response from the Julia service
+            response = client_socket.recv(4)
+            # first 4 bytes are the length of the response
+            length_bytes = response[:4]
+            result_length = int.from_bytes(length_bytes, byteorder='little', signed=True)
+            
+            #  read the actual response data
+            response_data = client_socket.recv(result_length)
+            # deserialize the response data to a pydict
+            reader = pa.ipc.open_stream(response_data)
+            response_table = reader.read_all()
+            
+                
+            # Receive the result from the Julia service
+            return response_table
