@@ -22,5 +22,23 @@ pip install -r requirements.txt
 ## To start all server instances
 
 ```bash
+python run_all.py
+```
+
+## To start all engine service instances
+
+```bash
+python run_engine_service.py
+```
+
+## To start gateway service instances
+
+```bash
 python run_server.py
 ```
+
+## Docker
+
+Use `server.dockerfile` to create container for gateway server service;
+
+Use `engine.dockerfile` to create container for engine services.
