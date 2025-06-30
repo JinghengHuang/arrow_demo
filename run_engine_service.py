@@ -1,7 +1,7 @@
 import multiprocessing
 from service.optimization_service.arrow_rpc_server import grpc_serve_addr
 import logging
-import sys
+import sys, os
 import yaml
 # Run all servers in multiprocessing
 
@@ -34,6 +34,9 @@ class EngineServer():
         return self.logger
     
     
+    def run_julia_server(self):
+        os.system('julia --project=./service/optimization_service/julia ./service/optimization_service/julia/engine.jl')
+    
     def run_grpc_server(self):
         logger = self.setup_custom_logger(f"worker_grpc")
         logger.info("Starting worker on gRPC server")
@@ -42,9 +45,12 @@ class EngineServer():
     # TODO Add other service starting points here
     def start_engine_services(self) -> None:
         grpc_thread = multiprocessing.Process(target=self.run_grpc_server, daemon=True)
+        julia_thread = multiprocessing.Process(target=self.run_julia_server, daemon=True)
         # Fon now, only FastAPI server, expand on gRPC if needed
         grpc_thread.start()
+        julia_thread.start()
         grpc_thread.join()
+        julia_thread.join()
 
 # Run script to start engine service
 if __name__ == "__main__":
