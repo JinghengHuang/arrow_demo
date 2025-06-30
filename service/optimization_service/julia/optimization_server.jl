@@ -61,19 +61,13 @@ function handle_optimization_request(client)
     try
         while true
             data_dict = read_data_from_client(client)
-            lpProblem = form_model(data_dict)
-            solver = get_solver(data_dict)
-            solverName = solver[:name]
-            solverParams = solver[:parameters]
-            @info "The solver in use is: $solverName with parameters: $solverParams"
-            try
-                # send success result to client
-                status, objval, sol = perform_optimization_using_COBRA(lpProblem, solverName, solverParams)
-                send_success_result(client, lpProblem, status, objval, sol)
-            catch e
-                # send error result to client
-                send_failure_result(client, e)
-            end
+            model, x, c = form_model(data_dict)
+            # send success result to client
+            start_time = time()
+            status, objval, sol = solvelp(model, x)
+            end_time = time()
+            @info "Time taken to solve the LP problem in COBRA.jl: $(end_time - start_time) seconds."
+            send_success_result(client, status, objval, sol)
         end
     catch e
         send_failure_result(client, e)
@@ -99,31 +93,21 @@ data_dict = read_data_from_client(client)
 ```
 """
 function read_data_from_client(client)
-    tables = Dict{Symbol,Arrow.Table}()
-    while true
-        header = read(client, UInt32)  # Read the fixed-length header
-        data_length = Int(header)
-        println("Received data length: ", data_length)
+    tables = Dict{Symbol,Any}()
+    header = read(client, UInt32)  # Read the fixed-length header
+    data_length = Int(header)
+    println("Received data length: ", data_length)
 
-        data = read(client, data_length)
+    data = read(client, data_length)
 
+    # Deserialize Arrow IPC data
+    buf = IOBuffer(data)
+    table = Arrow.Table(buf)
 
-        # Deserialize Arrow IPC data
-        buf = IOBuffer(data)
-        table = Arrow.Table(buf)
-
-        # keys 
-        println("Received table with keys: ", keys(table))
-
-        for key in keys(table)
-            println("========= Field: ", key)
-            column = table[key][1]
-            tables[key] = column
-            # println("Received column with key":keys(column))
-        end
+    for key in keys(table)
+        column = table[key][1]
+        tables[key] = column
     end
-    println("Received all data from client")
-    println()
     return tables
 end
 
@@ -142,25 +126,28 @@ solver = get_solver(data_dict)
 ```
 """
 function get_solver(data)
-    solver = Dict{Symbol,Any}()
-    # Extracts and processes the solver name.
-    solver_name_data = data[:solver][:solver_name]
-    solver_name = join(collect(skipmissing(solver_name_data)))
+    solver_dict = Dict{Symbol,Any}()
+    solver = data[:solver][:solver]
 
-    # processes the solver parameters.
-    solver_params_vector = []
-    if haskey(data[:solver], :solver_params)
-        solver_params = data[:solver][:solver_params]
-        for param in solver_params
-            if !ismissing(param)
-                for (k, v) in pairs(param)
-                    if !ismissing(v)
-                        push!(solver_params_vector, (k, v))
-                    end
-                end
-            end
-        end
-    end
+    # solver = Dict{Symbol,Any}()
+    # # Extracts and processes the solver name.
+    # solver_name_data = data[:solver][:solver_name]
+    # solver_name = join(collect(skipmissing(solver_name_data)))
+
+    # # processes the solver parameters.
+    # solver_params_vector = []
+    # if haskey(data[:solver], :solver_params)
+    #     solver_params = data[:solver][:solver_params]
+    #     for param in solver_params
+    #         if !ismissing(param)
+    #             for (k, v) in pairs(param)
+    #                 if !ismissing(v)
+    #                     push!(solver_params_vector, (k, v))
+    #                 end
+    #             end
+    #         end
+    #     end
+    # end
 
     # A dictionary holding both the solver name and parameters.
     solver[:name] = solver_name
@@ -186,82 +173,33 @@ function form_model(data)
     # Extract and convert the data
     println("Forming the LP problem from the provided data...")
     S_data = data[:S]
-    metadata = Arrow.getmetadata(S_data)
-    dimensions_str = metadata["dimensions"]
-    dimensions = parse.(Int, split(strip(dimensions_str, ['[', ']']), ", "))
-    println("Dimensions: ", dimensions)
+    b = Vector{Float64}(data[:b])
+    c = Vector{Float64}(data[:c])
+    lb = Vector{Float64}(data[:lb])
+    ub = Vector{Float64}(data[:ub])
+    csense_strs = Vector{String}(data[:csense])
+    osense_str = data[:osense]  # e.g. "max"
+    osense = osense_str == "max" ? -1 : 1  # 1 for min which is JuMP default, -1 for max
+    solver_table = data[:solver][:solver]
+
+
     row = Vector{Int64}(S_data[:row])
     col = Vector{Int64}(S_data[:col])
-    val = Vector{Float64}(S_data[:val])
-    nrows = dimensions[1]
-    ncols = dimensions[2]
-    println("maximum_row: ", maximum(row), " maximum_col: ", maximum(col))
-    println(" nrows: ", nrows, " ncols: ", ncols)
-    S = sparse(row, col, val, nrows, ncols)
+    data = Vector{Float64}(S_data[:data])
+    nrow = maximum(row) + 1
+    ncol = maximum(col) + 1
 
-    b = Vector{Float64}(data[:b][:b])
-    c = Vector{Float64}(data[:c][:c])
-    lb = Vector{Float64}(data[:lb][:lb])
-    ub = Vector{Float64}(data[:ub][:ub])
+    # sense_map = Dict("E" => '=', "G" => '≥', "L" => '≤')
+    sense_map = Dict("E" => '=', "G" => '>', "L" => '<')
+    csense = [sense_map[c] for c in csense_strs]
 
-    # deal with osense or osenseStr
-    if haskey(data, :osenseStr)
-        osense_value = data[:osenseStr][:osenseStr][1]
-        # Interpret the value of 'osenseStr' as an integer
-        if osense_value == "min"
-            osense = Int8(-1)
-        elseif osense_value == "max"
-            osense = Int8(1)
-        end
-    elseif haskey(data, :osense)
-        osense = data[:osense][:osense][1]
-    else
-        error("Objective sense not found in the data.")
-    end
+    S = sparse(row .+ 1, col .+ 1, data, nrow, ncol)
 
-    # Assuming data is already loaded and contains the csense field
-    csense_data = data[:csense][:csense]
-    # Combine the array of strings into a single string, ignoring any potential Missing values
-    csense_string = join(collect(skipmissing(csense_data)))
-    # Convert the single string to a character array
-    csense = collect(csense_string)
+    # c, A, sense, b, l, u, solver
+    solver_name = solver_table[:solver_name]
+    solver = changeCobraSolver(solver_name)
 
-
-    rxns = Vector{String}(data[:rxns][:rxns])
-    mets = Vector{String}(data[:mets][:mets])
-
-    if haskey(data, :d) && haskey(data, :C)
-        @info "The model is a coupled model."
-        C_data = data[:C]
-        metadata = Arrow.getmetadata(C_data)
-        dimensions_str = metadata["dimensions"]
-        dimensions = parse.(Int, split(strip(dimensions_str, ['[', ']']), ", "))
-
-        row = Vector{Int64}(C_data[:row])
-        col = Vector{Int64}(C_data[:col])
-        val = Vector{Float64}(C_data[:val])
-        nrows = dimensions[1]
-        ncols = dimensions[2]
-        C = sparse(row, col, val, nrows, ncols)
-
-        d = Vector{Float64}(data[:d][:d])
-        ctrs = Vector{String}(data[:ctrs][:ctrs])
-
-        dsense_data = data[:dsense][:dsense]
-        dsense_string = join(collect(skipmissing(dsense_data)))
-        dsense = collect(dsense_string)
-
-        # append the C, d, dsense, and mets vectors for a coupled model
-        S = [S; C]
-        b = [b; d]
-        csense = [csense; dsense]
-        mets = [mets; ctrs]
-    else
-        @info "The model is an uncoupled model."
-    end
-
-    # Construct the LPproblem struct
-    return CustomCOBRA.LPproblem(S, b, c, lb, ub, osense, csense, rxns, mets)
+    return buildlp(c * osense, S, csense, b, lb, ub, solver.handle)
 end
 
 
@@ -283,18 +221,12 @@ status, objval, sol = perform_optimization_using_COBRA(lpProblem, "GLPK", Dict()
 """
 function perform_optimization_using_COBRA(lpProblem, solverName="GLPK", solverParams=Dict())
     # Perform optimization
-    start_time = time()
+
     # Set the solver according to https://github.com/opencobra/COBRA.jl/blob/master/docs/src/configuration.md
     # pkgDir = joinpath(dirname(pathof(COBRA)), "..")
     # include(pkgDir * "/config/solverCfg.jl")
-    solver = CustomCOBRA.changeCobraSolver(solverName, solverParams)
-    status, objval, sol = CustomCOBRA.solveCobraLP(lpProblem, solver)
-    end_time = time()
-    @info "Time taken to solve the LP problem in COBRA.jl: $(end_time - start_time) seconds."
-    return status, objval, sol
 
 end
-
 
 """
     send_success_result(client::Sockets.Socket, lpProblem::COBRA.LPproblem, status::MathOptInterface.TerminationStatusCode, objval::Float64, sol::Vector{Float64})
@@ -314,20 +246,28 @@ Sends the results of an optimization problem back to the client upon successful 
 send_success_result(client, lpProblem, status, objval, sol)
 ```
 """
-function send_success_result(client, lpProblem, status, objval, sol)
-    success_table = DataFrame(success=true, num_tables=2)
+function send_success_result(client, status, objval, sol)
+    # Create a DataFrame with the results
 
-    # Convert status(MathOptInterface.TerminationStatusCode) to string
-    status = string(status)
+    result = [(; success=true, status=string(status), objective_value=objval, solution=[sol])]
 
-    main_result_df = DataFrame(rxns=lpProblem.rxns, flux=sol)
-    status_result_df = DataFrame(status=status, objective_value=objval)
 
+    try
+        # result_table = Arrow.Table(result)
+        # 写入内存
+        buf = IOBuffer()
+        Arrow.write(buf, result)
+
+        # 取出 Arrow IPC byte stream
+        ipc_bytes = take!(buf)
+        write(client, UInt32(length(ipc_bytes)))
+        write(client, ipc_bytes)
+
+    catch e
+        @error "Failed to create Arrow.Table from DataFrame: $(e)"
+    end
     # Send result back to client
-    send_result(client, success_table)
-    send_result(client, main_result_df)
-    send_result(client, status_result_df)
-    send_end_marker(client)
+    # send_result(client, ipc_bytes)
 end
 
 """
@@ -367,13 +307,13 @@ Sends a result table to the client through the specified socket. The function se
 send_result(client, result_table)
 ```
 """
-function send_result(client, result_table)
-    result_io = IOBuffer()
-    Arrow.write(result_io, result_table)
-    result_data = take!(result_io)
-    write(client, UInt32(length(result_data)))
-    write(client, result_data)
-end
+# function send_result(client, result_table)
+#     result_io = IOBuffer()
+#     Arrow.write(result_io, result_table)
+#     result_data = take!(result_io)
+#     write(client, UInt32(length(result_data)))
+#     write(client, result_data)
+# end
 
 
 """
@@ -397,6 +337,4 @@ end
 
 
 end  # module
-
-
 

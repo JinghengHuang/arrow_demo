@@ -66,17 +66,6 @@ class EngineModel:
             "ncol": pa.array([ncol], type=pa.int64())
         })
 
-        # Convert all other components to Arrow IPC bytes
-        # return {
-        #     "S": pa_to_ipc(S_batch),
-        #     "lb": pa_to_ipc(self.lb),
-        #     "ub": pa_to_ipc(self.ub),
-        #     "b": pa_to_ipc(self.b),
-        #     "c":  pa_to_ipc(self.c),
-        #     "osense": pa_to_ipc(self.osense),
-        #     "csense": pa_to_ipc(self.csense),
-        #     "S_shape": pa_to_ipc(S_shape_batch)
-        # }
         return {
             "S": S_batch,
             "S_shape": S_shape_batch,
