@@ -6,15 +6,16 @@ using Arrow
 using SparseArrays
 using DataFrames
 
-# use solve.jl
-script_path = @__FILE__
-script_dir = dirname(script_path)
-include(joinpath(script_dir, "solve.jl"))
+include("registry.jl")
+include("lp.jl")
+using .Registry
 
 
 # Export the functions
 export start_server
 
+# register the model builder function
+Registry.register_model("LP", (data) -> LPModel.build_jump_model(data))
 
 """
     start_server(host::String, port::Int)
@@ -61,10 +62,15 @@ function handle_optimization_request(client)
     try
         while true
             data_dict = read_data_from_client(client)
-            model, x, c = form_model(data_dict)
+            problem_type = uppercase(get_problem_type(data_dict))
+            builder = Registry.get_builder(problem_type)
+            if builder === nothing
+                error("Problem type $problem_type not supported by the server.")
+            end
+            model, x, c = builder(data_dict)
             # send success result to client
             start_time = time()
-            status, objval, sol = solvelp(model, x)
+            status, objval, sol = solve(model, x)
             end_time = time()
             @info "Time taken to solve the LP problem in COBRA.jl: $(end_time - start_time) seconds."
             send_success_result(client, status, objval, sol)
@@ -111,122 +117,29 @@ function read_data_from_client(client)
     return tables
 end
 
-"""
-    get_solver(data::Dict{Symbol, Any}) :: Dict{Symbol, Any}
 
-Extracts the solver name and parameters from the provided data dictionary.
-
-# Arguments
-- `data::Dict{Symbol, Any}`: A dictionary containing solver information.
-# Returns
-- `Dict{Symbol, Any}`: A dictionary with keys :name (solver name as a string) and :parameters (solver parameters as a vector of tuples).
-# Example
-```julia
-solver = get_solver(data_dict)
-```
-"""
-function get_solver(data)
+function get_problem_type(data)
     solver_dict = Dict{Symbol,Any}()
-    solver = data[:solver][:solver]
-
-    # solver = Dict{Symbol,Any}()
-    # # Extracts and processes the solver name.
-    # solver_name_data = data[:solver][:solver_name]
-    # solver_name = join(collect(skipmissing(solver_name_data)))
-
-    # # processes the solver parameters.
-    # solver_params_vector = []
-    # if haskey(data[:solver], :solver_params)
-    #     solver_params = data[:solver][:solver_params]
-    #     for param in solver_params
-    #         if !ismissing(param)
-    #             for (k, v) in pairs(param)
-    #                 if !ismissing(v)
-    #                     push!(solver_params_vector, (k, v))
-    #                 end
-    #             end
-    #         end
-    #     end
-    # end
-
-    # A dictionary holding both the solver name and parameters.
-    solver[:name] = solver_name
-    solver[:parameters] = solver_params_vector
-    return solver
-end
-
-"""
-    form_model(data::Dict{Symbol, Arrow.Table}) :: COBRA.LPproblem
-
-Forms an LP problem from the provided data dictionary and returns it as a COBRA.LPproblem.
-
-# Arguments
-- `data::Dict{Symbol, Arrow.Table}`: A dictionary containing data tables required to construct the LP problem.
-# Returns
-- `COBRA.LPproblem`: The constructed LP problem based on the provided data.
-# Example
-```julia
-lpProblem = form_model(data)
-```
-"""
-function form_model(data)
-    # Extract and convert the data
-    println("Forming the LP problem from the provided data...")
-    S_data = data[:S]
-    b = Vector{Float64}(data[:b])
-    c = Vector{Float64}(data[:c])
-    lb = Vector{Float64}(data[:lb])
-    ub = Vector{Float64}(data[:ub])
-    csense_strs = Vector{String}(data[:csense])
-    osense_str = data[:osense]  # e.g. "max"
-    osense = osense_str == "max" ? -1 : 1  # 1 for min which is JuMP default, -1 for max
     solver_table = data[:solver][:solver]
-
-
-    row = Vector{Int64}(S_data[:row])
-    col = Vector{Int64}(S_data[:col])
-    data = Vector{Float64}(S_data[:data])
-    nrow = maximum(row) + 1
-    ncol = maximum(col) + 1
-
-    # sense_map = Dict("E" => '=', "G" => '≥', "L" => '≤')
-    sense_map = Dict("E" => '=', "G" => '>', "L" => '<')
-    csense = [sense_map[c] for c in csense_strs]
-
-    S = sparse(row .+ 1, col .+ 1, data, nrow, ncol)
-
-    # c, A, sense, b, l, u, solver
     solver_name = solver_table[:solver_name]
-    solver = changeCobraSolver(solver_name)
-
-    return buildlp(c * osense, S, csense, b, lb, ub, solver.handle)
+    problem_type = solver_table[:solver_type]
+    # solver_params_vector = Vector{Tuple{String, Any}}(solver_table[:parameters])
+    # solver[:parameters] = solver_params_vector
+    # solver = SolverConfig(solver_name, solver_params_vector)
+    return problem_type
 end
 
 
-"""
-    perform_optimization_using_COBRA(lpProblem::COBRA.LPproblem, solverName::String="GLPK", solverParams::Dict{Symbol, Any}=Dict())
-
-Performs optimization on the given lpProblem using COBRA.jl and the specified solver and parameters.
-
-# Arguments
-- `lpProblem::COBRA.LPproblem`: The LP problem to be solved.
-- `solverName::String="GLPK"`: The name of the solver to use (default is "GLPK").
-- `solverParams::Dict{Symbol, Any}=Dict()`: Solver parameters.
-# Returns
-- `(status::MathOptInterface.TerminationStatusCode, objval::Float64, sol::Vector{Float64})`: The status of the optimization, the objective value, and the solution vector.
-# Example
-```julia
-status, objval, sol = perform_optimization_using_COBRA(lpProblem, "GLPK", Dict())
-```
-"""
-function perform_optimization_using_COBRA(lpProblem, solverName="GLPK", solverParams=Dict())
-    # Perform optimization
-
-    # Set the solver according to https://github.com/opencobra/COBRA.jl/blob/master/docs/src/configuration.md
-    # pkgDir = joinpath(dirname(pathof(COBRA)), "..")
-    # include(pkgDir * "/config/solverCfg.jl")
-
+function solve(model, x)
+    optimize!(model)
+    return (
+        status=termination_status(model),
+        objval=objective_value(model),
+        sol=value.(x)
+    )
 end
+
+
 
 """
     send_success_result(client::Sockets.Socket, lpProblem::COBRA.LPproblem, status::MathOptInterface.TerminationStatusCode, objval::Float64, sol::Vector{Float64})
@@ -254,11 +167,9 @@ function send_success_result(client, status, objval, sol)
 
     try
         # result_table = Arrow.Table(result)
-        # 写入内存
         buf = IOBuffer()
         Arrow.write(buf, result)
 
-        # 取出 Arrow IPC byte stream
         ipc_bytes = take!(buf)
         write(client, UInt32(length(ipc_bytes)))
         write(client, ipc_bytes)
@@ -291,29 +202,6 @@ function send_failure_result(client, error)
     send_result(client, failure_table)
     send_end_marker(client)
 end
-
-"""
-    send_result(client::Sockets.Socket, result_table::DataFrames.DataFrame)
-
-Sends a result table to the client through the specified socket. The function serializes the `result_table` using Arrow IPC format, writes its length as a header, and then sends the serialized data.
-
-# Arguments
-- `client::Sockets.Socket`: The client socket through which the result will be sent.
-- `result_table::DataFrames.DataFrame`: The result table that will be serialized and sent to the client. This table contains the data to be transmitted.
-
-# Example
-```julia
-# Assuming `client` is a valid Sockets.Socket and `result_table` is a DataFrame
-send_result(client, result_table)
-```
-"""
-# function send_result(client, result_table)
-#     result_io = IOBuffer()
-#     Arrow.write(result_io, result_table)
-#     result_data = take!(result_io)
-#     write(client, UInt32(length(result_data)))
-#     write(client, result_data)
-# end
 
 
 """

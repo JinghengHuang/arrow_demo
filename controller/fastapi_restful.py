@@ -5,7 +5,7 @@ import io
 from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import StreamingResponse
 from controller.endpoints import *
-from objects.engine_model import EngineModel
+from objects.lp_model import LPModel
 
 app = FastAPI()
 endpoint = Endpoint()
