@@ -2,7 +2,7 @@ from scipy.io import loadmat
 from io import BytesIO
 from scipy import sparse
 import numpy as np
-from objects.engine_model import EngineModel
+from objects.lp_model import LPModel
 import pyarrow as pa
 
 # file = request.files["matfile"] ← get uploaded .mat file from a form field
@@ -63,7 +63,7 @@ def load_model_from_mat(file_bytes: bytes) -> 'EngineModel':
     osense = pa.scalar(osense, type=pa.string())
     
     # Construct and return the EngineModel object
-    return EngineModel(model_name, S, b, c, lb, ub, osense, csense)
+    return LPModel(model_name, S, b, c, lb, ub, osense, csense)
 
 
 
