@@ -2,7 +2,7 @@ import json
 from objects.util.response import Response
 from typing import List, Dict, Optional, Union
 from utils.mat_parser import load_model_from_mat
-from objects.engine_model import EngineModel
+from objects.lp_model import LPModel
 from objects.solver_config import SolverConfig
 import service
 from service.service_factory import ServiceFactory

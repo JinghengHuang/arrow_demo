@@ -2,7 +2,7 @@ import pyarrow as pa
 import pyarrow.compute as pc
 
 
-class EngineModel:
+class LPModel:
     def __init__(
         self,
         model_name: str,
@@ -47,11 +47,6 @@ class EngineModel:
         col = self.S["col"]
         data = self.S["data"]
 
-        # Estimate matrix dimensions from max index values in row/col
-        # (since sparse matrix indices are 0-based, dimensions = max index + 1)
-        nrow = int(pc.max(row).as_py()) + 1
-        ncol = int(pc.max(col).as_py()) + 1
-
         # Create a RecordBatch for the sparse matrix S
         # with columns: "row", "col", "data"
         # and a RecordBatch for the shape of S with "nrow", "ncol
@@ -61,25 +56,8 @@ class EngineModel:
             "data": data
         })
         
-        S_shape_batch = pa.record_batch({
-            "nrow": pa.array([nrow], type=pa.int64()),
-            "ncol": pa.array([ncol], type=pa.int64())
-        })
-
-        # Convert all other components to Arrow IPC bytes
-        # return {
-        #     "S": pa_to_ipc(S_batch),
-        #     "lb": pa_to_ipc(self.lb),
-        #     "ub": pa_to_ipc(self.ub),
-        #     "b": pa_to_ipc(self.b),
-        #     "c":  pa_to_ipc(self.c),
-        #     "osense": pa_to_ipc(self.osense),
-        #     "csense": pa_to_ipc(self.csense),
-        #     "S_shape": pa_to_ipc(S_shape_batch)
-        # }
         return {
             "S": S_batch,
-            "S_shape": S_shape_batch,
             "b": self.b,
             "c": self.c,
             "lb": self.lb,
