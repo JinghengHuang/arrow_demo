@@ -7,10 +7,7 @@ import yaml
 
 class JuliaEngineServer():
     def __init__(self):
-        self.port = 8000
-        self.grpc_port = 8100
-        self.ipaddr_http = "127.0.0.1"
-        self.ipaddr_rpc = "127.0.0.1"
+        pass
         
     def config_loader(self):
         with open('config.yaml', 'r') as file:
