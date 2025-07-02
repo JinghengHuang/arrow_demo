@@ -1,6 +1,6 @@
 # Use an official Python runtime as a parent image
 FROM ubuntu:latest
-
+SHELL ["/bin/bash", "-c"]
 # Set environment variables for configuration
 RUN apt-get update && \
     apt-get install -y \
@@ -31,6 +31,7 @@ RUN apt-get install -y \
     libffi-dev \
     uuid-dev \
     python3.12-venv \
+    glpk-utils libglpk-dev glpk-doc \
     && cd /usr/src \
     && wget https://www.python.org/ftp/python/3.12.3/Python-3.12.3.tgz \
     && tar xzf Python-3.12.3.tgz \
@@ -45,6 +46,19 @@ RUN g++ --version && python3.12 --version
 # Set default python if desired
 RUN update-alternatives --install /usr/bin/python python /usr/local/bin/python3.12 1
 
+# install julia
+# Set JULIA version
+ENV JULIA_VERSION=1.11.5
+
+# Download and install Julia
+RUN wget https://julialang-s3.julialang.org/bin/linux/x64/1.11/julia-$JULIA_VERSION-linux-x86_64.tar.gz && \
+    tar -xvzf julia-$JULIA_VERSION-linux-x86_64.tar.gz && \
+    mv julia-$JULIA_VERSION /opt/julia && \
+    ln -s /opt/julia/bin/julia /usr/local/bin/julia && \
+    rm julia-$JULIA_VERSION-linux-x86_64.tar.gz
+
+# Test Julia
+RUN julia --version
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
@@ -57,11 +71,15 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 # Install any needed packages specified in requirements.txt 
 RUN pip install --no-cache-dir -r requirements.txt
 
+RUN julia --project="." -e 'using Pkg; Pkg.add("JuMP", preserve=PRESERVE_DIRECT);'
+
+RUN julia --project="." -e "using Pkg; Pkg.activate('Project.toml'); Pkg.instantiate()"
+
 # Make port 80 available to the world outside this container (Optional, only for web apps)
-EXPOSE 8000
+EXPOSE 65432
 
 # Define environment variable (optional)
 ENV NAME venv
 
 # Run app.py when the container launches
-CMD ["sh", "./startServer"]
+CMD ["sh", "./startJulia"]

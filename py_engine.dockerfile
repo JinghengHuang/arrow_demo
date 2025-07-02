@@ -68,19 +68,14 @@ RUN rm -rf .VIRTUAL_ENV
 ENV VIRTUAL_ENV=/usr/src/app/.venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-# Install any needed packages specified in requirements.txt 
+# Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
-
-RUN julia --project="." -e 'using Pkg; Pkg.add("JuMP", preserve=PRESERVE_DIRECT);'
-
-RUN julia --project="." -e "using Pkg; Pkg.activate('Project.toml'); Pkg.instantiate()"
 
 # Make port 80 available to the world outside this container (Optional, only for web apps)
 EXPOSE 8101
-EXPOSE 65432
 
 # Define environment variable (optional)
 ENV NAME venv
 
 # Run app.py when the container launches
-CMD ["python", "./run_engine_service.py"]
+CMD ["sh", "./staryPyEngine"]
