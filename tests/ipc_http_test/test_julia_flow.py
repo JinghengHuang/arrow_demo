@@ -1,4 +1,4 @@
-import requests
+import requests,time
 
 
 
@@ -16,8 +16,14 @@ def test_julia_flow():
         "solver_type": "LP",
         "solver_params": '{"presolve": true, "dual": true, "primal": true}'
     }
-    req = requests.post(url, files=files, data=params)
+    pre = time.time()
+    req = requests.post(url=url, files=files, data=params)
     print(req.content)
+    post = time.time()
+    diff = post - pre
+    print(f"Pre request: {pre}")
+    print(f"Post request: {post}")
+    print(f"Time diff: {diff}")
     
     
 if __name__ == "__main__":

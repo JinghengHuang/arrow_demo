@@ -5,7 +5,7 @@ import sys, os
 import yaml
 # Run all servers in multiprocessing
 
-class EngineServer():
+class PyEngineServer():
     def __init__(self):
         self.port = 8000
         self.grpc_port = 8100
@@ -45,15 +45,12 @@ class EngineServer():
     # TODO Add other service starting points here
     def start_engine_services(self) -> None:
         grpc_thread = multiprocessing.Process(target=self.run_grpc_server, daemon=True)
-        julia_thread = multiprocessing.Process(target=self.run_julia_server, daemon=True)
         # Fon now, only FastAPI server, expand on gRPC if needed
         grpc_thread.start()
-        julia_thread.start()
         grpc_thread.join()
-        julia_thread.join()
 
 # Run script to start engine service
 if __name__ == "__main__":
-    server = EngineServer()
+    server = PyEngineServer()
     server.config_loader()
     server.start_engine_services()

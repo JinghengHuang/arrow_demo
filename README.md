@@ -19,22 +19,16 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-## To start all server instances
+## To start all server instances (engine + gateway)
 
 ```bash
-python run_all.py
-```
-
-## To start all engine service instances
-
-```bash
-python run_engine_service.py
+startAll
 ```
 
 ## To start gateway service instances
 
 ```bash
-python run_server.py
+startServer
 ```
 
 ## Docker
