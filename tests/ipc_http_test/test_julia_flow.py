@@ -1,5 +1,5 @@
 import requests,time
-
+import pytest
 
 
 def test_julia_flow():
@@ -18,13 +18,11 @@ def test_julia_flow():
     }
     pre = time.time()
     req = requests.post(url=url, files=files, data=params)
-    print(req.content)
+    assert "Error" not in str(req.content)
+    print(str(req.content))
     post = time.time()
     diff = post - pre
     print(f"Pre request: {pre}")
     print(f"Post request: {post}")
     print(f"Time diff: {diff}")
     
-    
-if __name__ == "__main__":
-    test_julia_flow()

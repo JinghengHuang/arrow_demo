@@ -93,7 +93,7 @@ class LPProblem:
 
 def change_cobra_solver(name: str, params=None, print_level=1) -> SolverConfig:
     name = name.upper()
-    known_solvers = ["GLPK", "CPLEX", "GUROBI", "HIGHS"]
+    known_solvers = ["GLPK", "CPLEX", "GUROBI", "HIGHS", "APPSI_HIGHS"]
     if name not in known_solvers:
         raise ValueError(f"Unsupported solver: {name}")
     return SolverConfig(name)

@@ -20,14 +20,17 @@ class GrpcComputeService(BaseService):
         client = pa.flight.connect(f"grpc://{self.gRPC_ip}:{self.gRPC_port}")
         # Upload a new dataset(test data)
         # Not as a COO sparse matrix
-        data = load_model_from_mat(model_bin)
-        ipc = data.__dict__
-        data_table = ipc | solver.__dict__
-        # Convert to pyTable for shipping via Flight
-        data_table = dict_to_pa_table(ipc)
+        model = load_model_from_mat(model_bin)
+        model_ipc_dict= model.to_pydict()
+        solver_ipc_dict = solver.to_pydict()
+        message_table = dict_to_pa_table(model_ipc_dict).append_column("solver", dict_to_pa_table(solver_ipc_dict))
+        print(f"schema of message_table: {message_table.schema}")
+        
+        print(f"Sending model to Pyomo service: {message_table.schema.names}")
+        print(f"type of each column: {[message_table.column(i).type for i in range(len(message_table.schema))]}")
         upload_descriptor = pa.flight.FlightDescriptor.for_path(f"cobra_lp_params")
-        writer, reader = client.do_put(upload_descriptor, data_table.schema)
-        writer.write_table(data_table)
+        writer, reader = client.do_put(upload_descriptor, message_table.schema)
+        writer.write_table(message_table)
         writer.close()
         # Compute the model and drop dataset from gRPC server
         result_reader = client.do_get(pa.flight.Ticket(b"do_solver,cobra_lp_params,pyomo.cobra_lp"))

@@ -4,7 +4,7 @@ import pyarrow.ipc as ipc
 import requests
 import time
 
-def mat_test():
+def test_pyomo():
     # Upload the .mat file to server
     url = "http://127.0.0.1:8000/compute"
     mat_file_path = "sample\\e_coli_core.mat"
@@ -15,14 +15,18 @@ def mat_test():
         "model_name": "e_coli_core",
         "engine": "pyomo",
         "solver": "cobra_lp",
-        "solver_name": "glpk"
+        "solver_name": "Highs",
+        "solver_type": "LP",
+        "solver_params": '{"presolve": true, "dual": true, "primal": true}'
     }
     
     pre = time.time()
     req = requests.post(url=url, files=files, data=params)
-    print(req.content)
+    assert "Error" not in str(req.content)
+    print(str(req.content))
     post = time.time()
     diff = post - pre
     print(f"Pre request: {pre}")
     print(f"Post request: {post}")
     print(f"Time diff: {diff}")
+    

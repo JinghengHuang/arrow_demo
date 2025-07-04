@@ -7,17 +7,16 @@ import yaml
 
 class JuliaEngineServer():
     def __init__(self):
+        self.julia_port = 65432
+        self.ipaddr_julia = "0.0.0.0"
         pass
         
     def config_loader(self):
         with open('config.yaml', 'r') as file:
             nested_data = yaml.safe_load(file)
-            if nested_data["http"] is not None:
-                self.port = int(nested_data["http"]["port"])
-                self.ipaddr_http = nested_data["http"]["ip"]
-            if nested_data["grpc"] is not None:
-                self.grpc_port = int(nested_data["grpc"]["port"])
-                self.ipaddr_rpc = nested_data["grpc"]["ip"]
+            if nested_data["julia"] is not None:
+                self.julia_port = int(nested_data["julia"]["port"])
+                self.ipaddr_julia = nested_data["julia"]["ip"]
 
     def setup_custom_logger(self, name):
         self.logger = logging.getLogger(name)
@@ -32,7 +31,8 @@ class JuliaEngineServer():
     
     
     def run_julia_server(self):
-        os.system('julia --project=./ src/service/optimization_service/julia/engine.jl')
+        # Using system command to run julia, requires julia environment in the system
+        os.system(f'julia --project=src/service/optimization_service/julia src/service/optimization_service/julia/engine.jl {self.ipaddr_julia} {self.julia_port}')
     
         
     # TODO Add other service starting points here
