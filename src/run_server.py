@@ -39,8 +39,6 @@ class GatewayServer():
         uvicorn.run("controller.fastapi_restful:app",
                     host=self.ipaddr_http,
                     port=self.port,
-                    # Auto reload, dev mode
-                    reload=True, 
                     log_level="info",
                     access_log=True)
         

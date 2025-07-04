@@ -53,6 +53,8 @@ sh startJulia
 
 ## To run unit tests
 
+Remember to start all the services before running tests, otherwise the tests will fail.
+
 ```bash
 poetry run pytest
 ```
