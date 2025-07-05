@@ -1,7 +1,8 @@
 from pyomo.environ import *
 import numpy as np
-from collections import defaultdict
+from pyomo.opt import SolverStatus, TerminationCondition
 import pyarrow.compute as pc
+import os
 
 
 class SolverConfig:
@@ -35,12 +36,12 @@ class LPProblem:
         self.status = None
 
     def build_lp(self, solver: SolverConfig):
-        num_vars = len(self.c)
-        num_cons = len(self.b)
-
         model = ConcreteModel()
-        model.I = RangeSet(0, num_vars - 1)
-        model.J = RangeSet(0, num_cons - 1)
+                
+        n = self.c.shape[0]
+        m = self.b.shape[0]
+        model.I = RangeSet(0, n - 1)
+        model.J = RangeSet(0, m - 1)
 
         model.x = Var(model.I, domain=Reals)
 
@@ -50,26 +51,23 @@ class LPProblem:
             model.x[i].setub(self.ub[i])
 
         # Objective
-        if self.osense == -1:
-            model.obj = Objective(expr=sum(self.c[i] * model.x[i] for i in model.I), sense=maximize)
-        else:
-            model.obj = Objective(expr=sum(self.c[i] * model.x[i] for i in model.I), sense=minimize)
+        model.obj = Objective(expr=sum(self.c[i] * model.x[i] for i in model.I), sense=minimize if self.osense == -1 else maximize)
 
         # Constraints
         model.constraints = ConstraintList()
         # S is now always dense 2D array
-        for j in range(num_cons):
-            expr = sum(self.S[j][i] * model.x[i] for i in range(num_vars))
-            sense = self.csense[j]
-            if sense in ['=', 'E']:
-                model.constraints.add(expr == self.b[j])
-            elif sense in ['<', 'L']:
-                model.constraints.add(expr <= self.b[j])
-            elif sense in ['>', 'G']:
-                model.constraints.add(expr >= self.b[j])
+        def make_constraint_rule(i, model):
+            expr = sum(self.S[i, j] * model.x[j] for j in model.I)
+            if self.csense[i] in ['E', '=']:
+                return expr == self.b[i]
+            elif self.csense[i] in ['L', '<']:
+                return expr <= self.b[i]
+            elif self.csense[i] in ['G', '>']:
+                return expr >= self.b[i]
             else:
-                raise ValueError(f"Invalid constraint sense: {sense}")
+                raise ValueError(f"Invalid constraint sense: {self.csense[i]}")
 
+        model.constraints = Constraint(model.J, rule=lambda model, j: make_constraint_rule(j, model))
         self.model = model
         self.solver = solver
 
@@ -81,13 +79,13 @@ class LPProblem:
         result = opt.solve(self.model, tee=False)
 
         self.status = str(result.solver.termination_condition)
-        if self.status.lower() == "optimal":
+        if (result.solver.status == SolverStatus.ok) and (result.solver.termination_condition == TerminationCondition.optimal):
             self.solution = [value(self.model.x[i]) for i in self.model.I]
             self.objective_value = value(self.model.obj)
-            if self.osense == -1:
+            if self.osense == 1:
                 self.objective_value = -self.objective_value
-        else:
-            self.solution = None
+        elif result.solver.termination_condition == TerminationCondition.infeasible:
+            self.solution = "Infeasible"
             self.objective_value = None
 
 
