@@ -22,10 +22,11 @@ class GrpcComputeService(BaseService):
         print(client.supports_async)
         # Upload a new dataset(test data)
         # Not as a COO sparse matrix
-        model = load_model_from_mat(model_bin)
-        model_ipc_dict= model.to_pydict()
-        solver_ipc_dict = solver.to_pydict()
-        message_table = dict_to_pa_table(model_ipc_dict).append_column("solver", dict_to_pa_table(solver_ipc_dict))
+        # model = load_model_from_mat(model_bin)
+        # model_ipc_dict= model.to_pydict()
+        # solver_ipc_dict = solver.to_pydict()
+        # message_table = dict_to_pa_table(model_ipc_dict).append_column("solver", dict_to_pa_table(solver_ipc_dict))
+        message_table = dict_to_pa_table(model_bin)
         print(f"schema of message_table: {message_table.schema}")
         
         print(f"Sending model to Pyomo service: {message_table.schema.names}")
