@@ -36,4 +36,6 @@ class GrpcComputeService(BaseService):
         result_reader = client.do_get(pa.flight.Ticket(b"do_solver,cobra_lp_params,pyomo.cobra_lp"))
         client.do_action(pa.flight.Action("drop_dataset", "cobra_lp_params".encode('utf-8')))
 
+        client.close()
+
         return result_reader.read_all()
