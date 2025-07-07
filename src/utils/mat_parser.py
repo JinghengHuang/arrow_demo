@@ -47,11 +47,11 @@ def load_model_from_mat(file_bytes: bytes) -> 'EngineModel':
         [
             pa.array(S_coo.row.astype(np.int32)),  # row index
             pa.array(S_coo.col.astype(np.int32)),  # col index
-            pa.array(S_coo.data.astype(np.float64))  # data values
+            pa.array(S_coo.data.astype(np.float64))  # val values
         ],schema=pa.schema([
             ('row', pa.int32()),
             ('col', pa.int32()),
-            ('data', pa.float64())
+            ('val', pa.float64())
         ])
     )
     # convert to PyArrow arrays
@@ -63,7 +63,7 @@ def load_model_from_mat(file_bytes: bytes) -> 'EngineModel':
     osense = pa.scalar(osense, type=pa.string())
     
     # Construct and return the EngineModel object
-    return LPModel(model_name, S, b, c, lb, ub, osense, csense)
+    return LPModel(S, b, c, lb, ub, osense, csense)
 
 
 

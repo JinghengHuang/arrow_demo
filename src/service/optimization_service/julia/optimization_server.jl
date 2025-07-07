@@ -8,6 +8,7 @@ using DataFrames
 
 include("registry.jl")
 include("lp.jl")
+include("qp.jl")
 using .Registry
 
 
@@ -16,6 +17,7 @@ export start_server
 
 # register the model builder function
 Registry.register_model("LP", (data) -> LPModel.build_jump_model(data))
+Registry.register_model("QP", (data) -> QPModel.build_jump_model(data))
 
 """
     start_server(host::String, port::Int)
@@ -102,7 +104,6 @@ function read_data_from_client(client)
     tables = Dict{Symbol,Any}()
     header = read(client, UInt32)  # Read the fixed-length header
     data_length = Int(header)
-    println("Received data length: ", data_length)
 
     data = read(client, data_length)
 
@@ -120,7 +121,7 @@ end
 
 function get_problem_type(data)
     solver_dict = Dict{Symbol,Any}()
-    solver_table = data[:solver][:solver]
+    solver_table = data[:solver]
     solver_name = solver_table[:solver_name]
     problem_type = solver_table[:solver_type]
     # solver_params_vector = Vector{Tuple{String, Any}}(solver_table[:parameters])
