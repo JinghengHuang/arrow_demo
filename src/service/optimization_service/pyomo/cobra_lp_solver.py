@@ -15,7 +15,7 @@ class CobraLPSolver(BaseSolver):
         # Convert the data into an model acceptable format
         for k, v in params.items():
             self.model[k] = v
-        
+        print("Solver start")
         # Send the data to model
         # Get results, using custom solver
         # Use compatible version of highs when using highs
@@ -24,6 +24,7 @@ class CobraLPSolver(BaseSolver):
             model_conf["solver_name"] = "appsi_highs"
         solver = change_cobra_solver(model_conf.get("solver_name") or "glpk")
         lp = LPProblem(self.model["S"], self.model["b"], self.model["c"], self.model["lb"], self.model["ub"], self.model["osense"], self.model["csense"])
+        print("Building Model")
         lp.build_lp(solver)
         lp.solve()
         return {
