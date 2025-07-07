@@ -1,12 +1,12 @@
 import pathlib
 import pyarrow as pa
 import pyarrow.flight
-import pyarrow.parquet
 from service.optimization_service.solver_factory import SolverFactory
 import logging
 import sys
-import time
 from utils.dict_to_pa_table import dict_to_pa_table, unpack_pa_table_dict
+from concurrent.futures import ThreadPoolExecutor
+import threading
 
 solver_factory = SolverFactory()
 logger = logging.getLogger(__name__)
@@ -19,17 +19,20 @@ class FlightServer(pyarrow.flight.FlightServerBase):
         self._location = location
         self._repo = repo
         self._tables:dict = {}
+        self._lock = threading.Lock()
+        self.executor = ThreadPoolExecutor(max_workers=4)
 
     def _make_flight_info(self, dataset):
-        table = self._tables[dataset]
-        schema = table.schema
-        descriptor = pa.flight.FlightDescriptor.for_path(
-            dataset.encode('utf-8')
-        )
-        endpoints = [pa.flight.FlightEndpoint(dataset, [self._location])]
-        return pyarrow.flight.FlightInfo(schema,
-                                        descriptor,
-                                        endpoints,-1,-1)
+        with self._lock:
+            table = self._tables[dataset]
+            schema = table.schema
+            descriptor = pa.flight.FlightDescriptor.for_path(
+                dataset.encode('utf-8')
+            )
+            endpoints = [pa.flight.FlightEndpoint(dataset, [self._location])]
+            return pyarrow.flight.FlightInfo(schema,
+                                            descriptor,
+                                            endpoints,-1,-1)
 
     def list_flights(self, context, criteria):
         for dataset in self._repo.iterdir():
@@ -43,30 +46,37 @@ class FlightServer(pyarrow.flight.FlightServerBase):
         data_table = reader.read_all()
         problem = ""
         key = ""
-        if dataset.find(":") > 0:
-            problem = dataset.split(":")[0]
-            key = dataset.split(":")[1]
-            try:
-                if problem in self._tables:
-                    self._tables[problem][key] = data_table
-                else:
+        with self._lock:
+            if dataset.find(":") > 0:
+                problem = dataset.split(":")[0]
+                key = dataset.split(":")[1]
+                try:
+                    if problem in self._tables:
+                        self._tables[problem][key] = data_table
+                    else:
+                        self._tables[problem] = {}
+                        self._tables[problem][key] = data_table
+                except KeyError:
                     self._tables[problem] = {}
                     self._tables[problem][key] = data_table
-            except KeyError:
-                self._tables[problem] = {}
-                self._tables[problem][key] = data_table
-        else:
-            self._tables[dataset] = data_table
+            else:
+                self._tables[dataset] = data_table
 
     def do_get(self, context, ticket):
-        ticket_str:str = ticket.ticket.decode()
-        # handle do solvers
-        if ticket_str.find("do_solver") != -1:
-            return self.do_solver(ticket_str)
-        # default endpoint
-        else:
-            dataset = ticket.ticket.decode('utf-8')
-            return pa.flight.RecordBatchStream(self._tables[dataset])
+        with self._lock:
+            ticket_str:str = ticket.ticket.decode('utf-8')
+            # handle do solvers
+            if ticket_str.find("do_solver") != -1:
+                future = self.executor.submit(self.do_solver, ticket_str)
+                try:
+                    # set a timeout
+                    return future.result(timeout=30) 
+                except Exception as e:
+                    logger.error(f"Solver execution failed: {e}")
+                    raise pa.flight.FlightServerError(f"Solver error: {e}")
+            # default endpoint
+            else:
+                return pa.flight.RecordBatchStream(self._tables[ticket_str])
 
     def list_actions(self, context):
         return [
@@ -76,14 +86,13 @@ class FlightServer(pyarrow.flight.FlightServerBase):
     def do_action(self, context, action):
         if action.type == "drop_dataset":
             return self.do_drop_dataset(action.body.to_pybytes().decode('utf-8'))
-        elif action.type == "do_solver":
-            return self.do_solver(action.body.to_pybytes().decode('utf-8'))
         else:
             raise NotImplementedError
 
     # Drop all dataset related to a task
     def do_drop_dataset(self, dataset):
-        self._tables[dataset] = None
+        with self._lock:
+            self._tables[dataset] = None
     # Execute a solver
     def do_solver(self, param:str):
         params = param.split(',')
@@ -94,6 +103,7 @@ class FlightServer(pyarrow.flight.FlightServerBase):
         # get solver
         solver = solver_factory.get_solver(solver_name)
         # run solver and get result in form of pa table
+        logger.info("Computing model:")
         result = solver.run(input_params)
         logger.info(result)
         result_table = dict_to_pa_table(result)
