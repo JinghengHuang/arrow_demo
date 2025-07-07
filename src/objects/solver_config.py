@@ -1,12 +1,12 @@
+from .base_model import ArrowModel
+
 """
     class SolverConfig:
     This class is used to store the configuration for the solver.
     It includes the solver name, the solver type, and any additional parameters needed for the solver
 """
 
-
-
-class SolverConfig:
+class SolverConfig(ArrowModel):
     def __init__(self, solver_name: str, solver_type: str = "LP", params: dict = None):
         """
         Initialize the SolverConfig with the solver name, type, and parameters.
@@ -23,19 +23,7 @@ class SolverConfig:
         print(f"type of params: {type(params)}")
         self.params = params if params is not None else {}
         
-    def to_pydict(self):
-        """
-        Convert the SolverConfig to a dictionary for serialization.
-        
-        :return: A dictionary representation of the SolverConfig
-        """
-        solver_dict = {
-            "solver_name": self.solver_name,
-            "solver_type": self.solver_type,
-        }
-        if self.params:
-            for key, value in self.params.items():
-                solver_dict[key] = value
-        return {"solver":solver_dict}
+    def sanity_check(self) -> None:
+        return super().sanity_check()
         
     
