@@ -8,6 +8,7 @@ using DataFrames
 
 include("registry.jl")
 include("lp.jl")
+include("qp.jl")
 using .Registry
 
 
@@ -16,6 +17,7 @@ export start_server
 
 # register the model builder function
 Registry.register_model("LP", (data) -> LPModel.build_jump_model(data))
+Registry.register_model("QP", (data) -> QPModel.build_jump_model(data))
 
 """
     start_server(host::String, port::Int)

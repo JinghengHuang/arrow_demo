@@ -1,11 +1,11 @@
 from typing import Union, Annotated
 import pyarrow as pa
 import pyarrow.ipc as ipc
+from fastapi import Request
 import io
 from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import StreamingResponse
 from controller.endpoints import *
-from objects.lp_model import LPModel
 
 app = FastAPI()
 endpoint = Endpoint()
@@ -19,29 +19,16 @@ def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
 
 @app.post("/compute")
-async def compute(model: Annotated[UploadFile, File(), None] = None,
-            model_name: Annotated[str, None] = Form(...),
-            engine: Annotated[str, None] = Form(...),
-            solver_name: Annotated[str, None] = Form(...),
-            solver_type: Annotated[str, None] = Form("LP"),
-            solver_params: Annotated[Optional[str], Form()] = None):
-    contents = await model.read()
-    # handle model saving logic
-    result = endpoint.compute(payload={
-        "model_name": model_name,
-        "engine": engine,
-        "solver_name": solver_name,
-        "solver_type": solver_type,
-        "solver_params": solver_params,
-        "model": contents
-    })
+async def compute(request: Request):
+    raw = await request.body()
+    reader = pa.ipc.open_stream(raw)
+    table = reader.read_all()
+    result = endpoint.compute(payload=table)
     result = result.to_pydict()
-    # handle compute logic
     return {
-        "message": f"Computing model {model_name} successful",
+        "message": f"Computing model successful",
         "result": result
     }
-
 
 @app.post("/saveModel")
 async def save(model_id: Annotated[Optional[str], Form()] = None, 

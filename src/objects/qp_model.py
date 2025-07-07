@@ -1,7 +1,7 @@
 import pyarrow as pa
 import pyarrow.compute as pc
 from .base_model import ArrowModel
-from utils.model_sanity_check import check_arrow_coo_matrix, check_variable_bounds, check_objective_sense
+from ..utils.model_sanity_check import check_arrow_coo_matrix, check_variable_bounds
 
 class QPModel(ArrowModel):
     """
