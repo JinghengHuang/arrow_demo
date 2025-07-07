@@ -1,71 +1,99 @@
 import pyarrow as pa
 import pyarrow.compute as pc
+from .base_model import ArrowModel
+from utils.model_sanity_check import check_arrow_coo_matrix, check_variable_bounds, check_objective_sense
 
+"""
+LPModel: Linear Programming Model Representation using PyArrow
 
-class LPModel:
+This class provides a structured way to represent a standard linear programming (LP) model
+using Arrow's in-memory format for high-performance serialization and communication.
+
+Standard LP form:
+    minimize     c^T x
+    subject to   A x = b
+                 lb <= x <= ub
+
+Model Components:
+    - A:       Constraint matrix in sparse COO format (as a RecordBatch with columns "row", "col", "val")
+    - b:       Right-hand side vector
+    - c:       Objective function coefficients
+    - lb:      Lower bound for each variable(Optional)
+    - ub:      Upper bound for each variable(Optional)
+    - osense:  Objective sense, e.g., "min" or "max" (Optional, defaults to "min")
+    - csense:  Constraint senses, e.g., ["E", "L", "G"] for equality, ≤, ≥ (Optional, defaults to all "E")
+"""
+
+class LPModel(ArrowModel):
     def __init__(
         self,
-        model_name: str,
-        S: pa.RecordBatch,
+        A: pa.RecordBatch,
         b: pa.Array,
         c: pa.Array,
-        lb: pa.Array,
-        ub: pa.Array,
-        osense: pa.Scalar,
-        csense: pa.Array
+        lb: pa.Array = None,
+        ub: pa.Array = None,
+        osense: pa.Scalar = None,
+        csense: pa.Array = None
     ):
-        # Ensure that S is a valid RecordBatch
-        if not isinstance(S, pa.RecordBatch):
-            raise TypeError("S must be a pyarrow RecordBatch")
+        """
+    Initialize an LP model.
 
-        # Ensure that required columns exist in S: row indices, column indices, and data
-        for name in ["row", "col", "data"]:
-            if name not in S.schema.names:
-                raise ValueError(f"S must contain column '{name}'")
+    Required:
+            - A (RecordBatch): Sparse constraint matrix in COO format with "row", "col", "val"
+            - b (Array): Right-hand side vector
+            - c (Array): Objective function coefficients
 
-        self.model_name = model_name
-        self.S = S            # Sparse matrix in COO format (row, col, data)
+        Optional:
+            - lb (Array): Lower bounds (default: None, treated as unbounded)
+            - ub (Array): Upper bounds (default: None, treated as unbounded)
+            - osense (Scalar): "min" or "max" (default: "min")
+            - csense (Array): ["E", "L", "G"] (default: all "E")
+
+    Raises:
+        TypeError / ValueError if inputs are malformed
+    """
+        if not isinstance(A, pa.RecordBatch):
+            raise TypeError("A must be RecordBatch")
+        if not all(name in A.schema.names for name in ["row", "col", "val"]):
+            raise ValueError("A must contain 'row', 'col', and 'val' columns")
+
+        self.A = A            # Sparse matrix in COO format (row, col, val)
         self.b = b            # Right-hand side vector
         self.c = c            # Objective function coefficients
-        self.lb = lb          # Lower bounds
-        self.ub = ub          # Upper bounds
-        self.osense = osense  # Objective sense (e.g., "max" or "min")
-        self.csense = csense  # Constraint senses (e.g., ["E", "L", "G"])     
-        
-
-    def to_pydict(self):
+        self.lb = lb    # Lower bounds for decision variables
+        self.ub = ub    # Upper bounds for decision variables
+        self.osense = osense if osense is not None else pa.scalar("min", type=pa.string())
+        self.csense = csense if csense is not None else pa.array(["E"] * len(b), type=pa.string())
+              
+              
+              
+    def sanity_check(self):
         """
-        Convert the model to Arrow IPC binary blocks for transmission.
-        Returns:
-            A dictionary mapping each component name to its serialized Arrow IPC bytes:
-                - "S":     Sparse matrix in COO format (RecordBatch with "row", "col", "data")
-                - "S_shape": RecordBatch with matrix shape: "nrow", "ncol"
-                - "b", "c", "lb", "ub", "csense": RecordBatches
-                - "osense": Scalar (wrapped and serialized)
-        """
-        row = self.S["row"]
-        col = self.S["col"]
-        data = self.S["data"]
+        Perform consistency checks on LP model dimensions and indices.
 
-        # Create a RecordBatch for the sparse matrix S
-        # with columns: "row", "col", "data"
-        # and a RecordBatch for the shape of S with "nrow", "ncol
-        S_batch = pa.record_batch({
-            "row": row,
-            "col": col,
-            "data": data
-        })
-        
-        return {
-            "S": S_batch,
-            "b": self.b,
-            "c": self.c,
-            "lb": self.lb,
-            "ub": self.ub,
-            "osense": self.osense,
-            "csense": self.csense
-        }
-    
-        
-        
-    
+        This includes:
+            - Shape consistency between variable vectors and bounds
+            - Index validity in sparse matrix A
+            - Constraint sense and objective sense validity
+
+        Raises:
+            ValueError: If any mismatch or invalid structure is detected.
+        """
+        n_vars = len(self.c)
+        n_cons = len(self.b)
+
+        # 1. Check sparse matrix A: row/col index validity
+        check_arrow_coo_matrix("A", self.A, n_cons, n_vars)
+
+        # 2. Check bounds (optional)
+        check_variable_bounds(self.lb, self.ub, n_vars)
+
+        # 3. Check csense (must match number of constraints)
+        if len(self.csense) != n_cons:
+            raise ValueError(f"Length of csense ({len(self.csense)}) != number of constraints ({n_cons})")
+        for i, val in enumerate(self.csense):
+            if val.as_py() not in {"E", "L", "G"}:
+                raise ValueError(f"Invalid csense[{i}] = {val.as_py()} (must be one of 'E', 'L', 'G')")
+
+        # 4. Check osense
+        check_objective_sense(self.osense)
