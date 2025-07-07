@@ -6,11 +6,11 @@ using HiGHS
 using SparseArrays
 #-------------------------------------------------------------------------------------------
 """
-    LPproblem(S, b, c, lb, ub, osense, csense)
+    LPproblem(A, b, c, lb, ub, osense, csense)
 
 General type for storing an LP problem which contains the following fields:
 
-- `S`:              LHS matrix (m x n)
+- `A`:              LHS matrix (m x n)
 - `b`:              RHS vector (m x 1)
 - `c`:              Objective coefficient vector (n x 1)
 - `lb`:             Lower bound vector (n x 1)
@@ -22,7 +22,7 @@ General type for storing an LP problem which contains the following fields:
 """
 
 mutable struct LPproblem
-    S::Union{SparseMatrixCSC{Float64,Int64},AbstractMatrix}
+    A::Union{SparseMatrixCSC{Float64,Int64},AbstractMatrix}
     b::Array{Float64,1}
     c::Array{Float64,1}
     lb::Array{Float64,1}
@@ -39,7 +39,7 @@ function build_jump_model(data)
     # println("Data received: ", data)
     # Convert the input sense to a vector of characters
     # Extract and convert the data
-    S_data = data[:S]
+    A_data = data[:A]
     b = Vector{Float64}(data[:b])
     c = Vector{Float64}(data[:c])
     lb = Vector{Float64}(data[:lb])
@@ -47,11 +47,11 @@ function build_jump_model(data)
     csense_strs = Vector{String}(data[:csense])
     osense_str = data[:osense]  # e.g. "max"
     osense = osense_str == "max" ? -1 : 1  # 1 for min which is JuMP default, -1 for max
-    solver_table = data[:solver][:solver]
+    solver_table = data[:solver]
 
-    row = Vector{Int64}(S_data[:row])
-    col = Vector{Int64}(S_data[:col])
-    data = Vector{Float64}(S_data[:data])
+    row = Vector{Int64}(A_data[:row])
+    col = Vector{Int64}(A_data[:col])
+    val = Vector{Float64}(A_data[:val])
     nrow = maximum(row) + 1
     ncol = maximum(col) + 1
 
@@ -59,14 +59,14 @@ function build_jump_model(data)
     sense_map = Dict("E" => '=', "G" => '>', "L" => '<')
     csense = [sense_map[c] for c in csense_strs]
 
-    S = sparse(row .+ 1, col .+ 1, data, nrow, ncol)
+    A = sparse(row .+ 1, col .+ 1, val, nrow, ncol)
 
     # c, A, sense, b, l, u, solver
     solver_name = solver_table[:solver_name]
     solver = changeSolver(solver_name)
 
     # Create the LPproblem object
-    return buildlp(c * osense, S, csense, b, lb, ub, solver.handle)
+    return buildlp(c * osense, A, csense, b, lb, ub, solver.handle)
 end
 
 

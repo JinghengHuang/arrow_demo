@@ -50,7 +50,7 @@ class Endpoint:
         """
         pass
 
-    def compute(self, payload: Dict) -> Dict:
+    def compute(self, payload) -> Dict:
         """
         Execute computation using a model and data, either from ID or inline.
 
@@ -59,16 +59,22 @@ class Endpoint:
             - dataId or data
             - dataName (optional)
         :return: Dict with result metadata and output
-        """
-        if payload['model'] is not None:
-            service = self.service_factory.create_service(payload["engine"])
-            params_str = payload.get("solver_params", None)
-            solver = SolverConfig(
-                solver_name=payload["solver_name"],
-                solver_type=payload["solver_type"],
-                params= json.loads(params_str) if params_str else None
-            )           
-            result = service.compute(payload['model'], solver)
+        """        
+        model_name = payload.column("model_name")[0].as_py()
+        engine = payload.column("engine")[0].as_py()
+        solver = payload.column("solver")[0].as_py()
+        service = self.service_factory.create_service(engine)
+        # Note: solver is a dictionary, we can access its fields directly
+        if isinstance(solver, dict):
+            solver_name = solver.get("solver_name", None)
+            solver_type = solver.get("solver_type", None)
+            solver_params = solver.get("solver_params", None)
+        solver = SolverConfig(
+                solver_name=solver_name,
+                solver_type=solver_type,
+                params= solver_params
+            )    
+        result = service.compute(payload.column("model")[0].as_py(), solver)
         return result
 
     def compute_cobra(self, payload: Dict) -> Dict:
