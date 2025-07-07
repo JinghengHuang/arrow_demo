@@ -3,7 +3,7 @@ import numpy as np
 from pyomo.opt import SolverStatus, TerminationCondition
 import pyarrow.compute as pc
 import os
-
+import gc
 
 class SolverConfig:
     def __init__(self, name, handle=None):
@@ -43,6 +43,7 @@ class LPProblem:
         model.I = RangeSet(0, n - 1)
         model.J = RangeSet(0, m - 1)
 
+        print("Setting x:")
         model.x = Var(model.I, domain=Reals)
 
         # Bounds
@@ -50,24 +51,29 @@ class LPProblem:
             model.x[i].setlb(self.lb[i])
             model.x[i].setub(self.ub[i])
 
+        print("Setting objectives:")
         # Objective
         model.obj = Objective(expr=sum(self.c[i] * model.x[i] for i in model.I), sense=minimize if self.osense == -1 else maximize)
 
-        # Constraints
-        model.constraints = ConstraintList()
         # S is now always dense 2D array
-        def make_constraint_rule(i, model):
-            expr = sum(self.S[i, j] * model.x[j] for j in model.I)
-            if self.csense[i] in ['E', '=']:
-                return expr == self.b[i]
-            elif self.csense[i] in ['L', '<']:
-                return expr <= self.b[i]
-            elif self.csense[i] in ['G', '>']:
-                return expr >= self.b[i]
+        # Setting constraints
+        print("Setting constraints:")
+        i = 0
+        j = 0
+        model.constraints = ConstraintList()
+        
+        for j in range(self.S.shape[0]):
+            print(f"Setting expression for {j}:")
+            expr = sum(self.S[j, i] * model.x[i] for i in range(self.S.shape[1]))
+            print(f"Setting expression for {j} done")
+            if self.csense[j] in ['E', '=']:
+                model.constraints.add(expr == self.b[j])
+            elif self.csense[j] in ['L', '<']:
+                model.constraints.add(expr <= self.b[j])
+            elif self.csense[j] in ['G', '>']:
+                model.constraints.add(expr >= self.b[j])
             else:
-                raise ValueError(f"Invalid constraint sense: {self.csense[i]}")
-
-        model.constraints = Constraint(model.J, rule=lambda model, j: make_constraint_rule(j, model))
+                raise ValueError(f"Invalid constraint sense: {self.csense[j]}")
         self.model = model
         self.solver = solver
 
@@ -80,6 +86,7 @@ class LPProblem:
 
         self.status = str(result.solver.termination_condition)
         if (result.solver.status == SolverStatus.ok) and (result.solver.termination_condition == TerminationCondition.optimal):
+            print("Solved.")
             self.solution = [value(self.model.x[i]) for i in self.model.I]
             self.objective_value = value(self.model.obj)
             if self.osense == 1:
