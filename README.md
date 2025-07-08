@@ -27,6 +27,15 @@ source .venv/bin/activate
 poetry install --no-root
 ```
 
+## To install new dependency package
+
+```bash
+# With poetry
+poetry add <dependency-name>
+```
+
+Please don't use pip or any other dependency management.
+
 ## To start all server instances (engine + gateway)
 
 ```bash
@@ -95,4 +104,3 @@ docker run -d --net=host julia-engine-server
 See `config.yaml` for service ip/port configurations.
 
 If ports are changed, remember to change the Dockerfiles respectively to ensure the right ports are opened.
-
