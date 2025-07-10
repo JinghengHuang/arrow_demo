@@ -56,7 +56,7 @@ class QPProblem:
         model.I = RangeSet(0, n - 1)
 
         print("Setting x:")
-        model.x = Var(model.I, domain=Reals)
+        model.x = Var(model.I, within=Reals)
 
         # Bounds
         for i in model.I:
@@ -93,9 +93,9 @@ class QPProblem:
     def solve(self):
         if self.model is None or self.solver is None:
             raise RuntimeError("Model not built or solver not assigned.")
-
+        sol_path = "./sol.sol"
         if "highs" in self.solver.name.lower(): 
-            opt = HiGHS()
+            opt = HiGHS(solution_file=sol_path, mip_heuristic_effort=0.2, mip_detect_symmetry="on")
         else:
             opt = SolverFactory(self.solver.name.lower())
 
@@ -104,7 +104,34 @@ class QPProblem:
             self.status = str(opt.status)
             print(opt)
             if self.status == "Optimal":
-                self.solution = [value(self.model.x[i]) for i in self.model.I]
+                # Get from the sol file
+                x = []
+                with open(sol_path, "r") as f:
+                    lines = f.readlines()
+                    section = None
+                    is_primal = False
+                    for j, line in enumerate(lines):
+                        if "# Primal solution values" in line:
+                            is_primal = True
+                            continue
+                        if "Columns" in line:
+                            section = "col"
+                            continue
+                        if "Rows" in line:
+                            section = "row"
+                            continue
+                        if "Dual solution values" in line:
+                            is_primal = False
+                            continue
+                        if is_primal and section == "col":
+                            parts = line.strip().split()
+                            val = float(parts[-1])
+                            x.append(val)
+                        
+                
+                if os.path.exists(sol_path):
+                    os.remove(sol_path)
+                self.solution = [x]
                 self.objective_value = value(opt.objective)
                 if self.osense == 1:
                     self.objective_value = -self.objective_value
