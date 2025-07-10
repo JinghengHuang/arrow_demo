@@ -10,6 +10,16 @@ Python >= 3.12 Recommended
 
 Now integrated with poetry, and can be used to run unit tests. The best practice is to use poetry to handle dependency and environment management.
 
+Currently supported solvers:
+
+    - GLPK
+    - CPLEX
+    - GUROBI
+    - HIGHS
+    - IPOPT
+
+Please ensure that the executables for the solvers are properly installed and in the system PATH.
+
 ## To create and activate virtual environment
 
 ```bash

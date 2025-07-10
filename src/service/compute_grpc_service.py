@@ -21,6 +21,8 @@ class GrpcComputeService(BaseService):
         client.as_async()
         print(client.supports_async)
         # Upload a new dataset
+        if "solver" not in model_bin:
+            model_bin["solver"] = solver.__dict__
         message_table = dict_to_pa_table(model_bin)
         model_name = model_bin["model_name"]
         print(f"schema of message_table: {message_table.schema}")
@@ -38,7 +40,7 @@ class GrpcComputeService(BaseService):
             writer.write_table(message_table)
             writer.done_writing()
             _ = reader.read()
-            get_param = "do_solver," + param_str + ",pyomo.cobra_lp"
+            get_param = "do_solver," + param_str + ",pyomo." + solver.solver_type.lower()
             # Compute the model and drop dataset from gRPC server
             result_reader = client.do_get(ticket=pa.flight.Ticket(get_param.encode('utf-8')))
             client.do_action(pa.flight.Action("drop_dataset", param_str.encode('utf-8')))

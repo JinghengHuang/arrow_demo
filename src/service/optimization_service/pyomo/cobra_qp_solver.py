@@ -2,10 +2,10 @@
 import pyomo.environ as pyo
 import pyarrow as pa
 import numpy as np
-from service.optimization_service.pyomo.lp_problem import change_cobra_solver, LPProblem
+from service.optimization_service.pyomo.qp_problem import change_cobra_solver, QPProblem
 from service.optimization_service.solver import BaseSolver
 
-class CobraLPSolver(BaseSolver):
+class CobraQPSolver(BaseSolver):
     def __init__(self):
         self.model = {}
         super().__init__()
@@ -23,17 +23,17 @@ class CobraLPSolver(BaseSolver):
         if model_conf.get("solver_name").upper() == "HIGHS":
             model_conf["solver_name"] = "appsi_highs"
         solver = change_cobra_solver(model_conf.get("solver_name") or "glpk")
-        lp = LPProblem(self.model["S"], self.model["b"], self.model["c"], self.model["lb"], self.model["ub"], self.model["osense"], self.model["csense"])
+        qp = QPProblem(self.model["A"], self.model["G"], self.model["Q"], self.model["b"], self.model["c"], self.model["h"], self.model["lb"], self.model["osense"], self.model["ub"])
         print("Building Model")
-        try:
-            lp.build_lp(solver)
-            lp.solve()
-            return {
-                "solution": lp.solution,
-                "status": lp.status,
-                "obj_val": lp.objective_value
-            }
-        except Exception as e:
-            return {
-                "Exception:": str(e)
-            }
+        # try:
+        qp.build_qp(solver)
+        qp.solve()
+        return {
+            "solution": qp.solution,
+            "status": qp.status,
+            "obj_val": qp.objective_value
+        }
+        # except Exception as e:
+        #     return {
+        #         "Exception:": str(e)
+        #     }
