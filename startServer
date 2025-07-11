@@ -1,2 +1,1 @@
-python src/run_server
-.py
+python src/run_server.py
