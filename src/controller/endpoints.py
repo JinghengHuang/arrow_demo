@@ -73,8 +73,10 @@ class Endpoint:
                 solver_name=solver_name,
                 solver_type=solver_type,
                 params= solver_params
-            )    
-        result = service.compute(payload.column("model")[0].as_py(), solver)
+            )
+        map = payload.column("model")[0].as_py()
+        map["model_name"] = model_name
+        result = service.compute(map, solver)
         return result
 
     def compute_cobra(self, payload: Dict) -> Dict:

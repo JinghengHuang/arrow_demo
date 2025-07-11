@@ -47,7 +47,7 @@ dependencies = [
     "pydantic (==2.11.7)",
     "pydantic-core (==2.33.2)",
     "pygments (==2.19.1)",
-    "pyomo[appsi] (>=6.9.2,<7.0.0)",
+    "pyomo (>=6.9.2,<7.0.0)",
     "python-dotenv (==1.1.0)",
     "python-multipart (==0.0.20)",
     "pyyaml (==6.0.2)",
@@ -70,7 +70,9 @@ dependencies = [
     "websockets (==15.0.1)",
     "zope-event (==5.0)",
     "zope-interface (==7.2)",
-    "highspy (>=1.11.0,<2.0.0)"
+    "highspy (>=1.11.0,<2.0.0)",
+    "pytest (>=8.4.1,<9.0.0)",
+    "gethighs @ git+https://github.com/bruscalia/gethighs"
 ]
 
 

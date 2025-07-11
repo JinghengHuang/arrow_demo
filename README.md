@@ -10,6 +10,16 @@ Python >= 3.12 Recommended
 
 Now integrated with poetry, and can be used to run unit tests. The best practice is to use poetry to handle dependency and environment management.
 
+Currently supported solvers:
+
+    - GLPK
+    - CPLEX
+    - GUROBI
+    - HIGHS
+    - IPOPT
+
+Please ensure that the executables for the solvers are properly installed and in the system PATH.
+
 ## To create and activate virtual environment
 
 ```bash
@@ -26,6 +36,15 @@ source .venv/bin/activate
 # With poetry
 poetry install --no-root
 ```
+
+## To install new dependency package
+
+```bash
+# With poetry
+poetry add <dependency-name>
+```
+
+Please don't use pip or any other dependency management.
 
 ## To start all server instances (engine + gateway)
 
@@ -95,4 +114,3 @@ docker run -d --net=host julia-engine-server
 See `config.yaml` for service ip/port configurations.
 
 If ports are changed, remember to change the Dockerfiles respectively to ensure the right ports are opened.
-

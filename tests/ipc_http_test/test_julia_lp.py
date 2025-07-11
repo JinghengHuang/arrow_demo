@@ -1,29 +1,28 @@
-import requests,time
+# import requests,time
 
 
-def test_julia_flow():
-    # Upload the .mat file to server
-    url = "http://127.0.0.1:8000/compute"
-    mat_file_path = "sample/e_coli_core.mat"
-    files = {
-        'model': ('e_coli_core.mat', open(mat_file_path, 'rb'),  "application/octet-stream")
-    }
-    params = {
-        "model_name": "e_coli_core",
-        "engine": "julia",
-        "solver_name": "Highs",
-        "solver_type": "LP",
-        "solver_params": '{"presolve": true, "dual": true, "primal": true}'
-    }
-    pre = time.time()
-    req = requests.post(url=url, files=files, data=params)
-    # assert "Error" not in str(req.content)
-    print(str(req.content))
-    post = time.time()
-    diff = post - pre
-    print(f"Pre request: {pre}")
-    print(f"Post request: {post}")
-    print(f"Time diff: {diff}")
+# def test_julia_flow():
+#     # Upload the .mat file to server
+#     url = "http://127.0.0.1:8000/compute"
+#     mat_file_path = "sample/e_coli_core.mat"
+#     files = {
+#         'model': ('e_coli_core.mat', open(mat_file_path, 'rb'),  "application/octet-stream")
+#     }
+#     params = {
+#         "model_name": "e_coli_core",
+#         "engine": "julia",
+#         "solver_name": "Highs",
+#         "solver_type": "LP",
+#         "solver_params": '{"presolve": true, "dual": true, "primal": true}'
+#     }
+#     pre = time.time()
+#     req = requests.post(url=url, files=files, data=params)
+#     # assert "Error" not in str(req.content)
+#     print(str(req.content))
+#     post = time.time()
+#     diff = post - pre
+#     print(f"Pre request: {pre}")
+#     print(f"Post request: {post}")
+#     print(f"Time diff: {diff}")
     
     
-test_julia_flow()
