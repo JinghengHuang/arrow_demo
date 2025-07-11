@@ -79,7 +79,10 @@ class LPProblem:
         if self.model is None or self.solver is None:
             raise RuntimeError("Model not built or solver not assigned.")
 
-        opt = SolverFactory(self.solver.name.lower())
+        if "gurobi" in self.solver.name.lower():
+            opt = SolverFactory(self.solver.name.lower(), solver_io="python")
+        else:
+            opt = SolverFactory(self.solver.name.lower())
         result = opt.solve(self.model, tee=False)
 
         self.status = str(result.solver.termination_condition)
