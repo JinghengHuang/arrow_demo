@@ -96,6 +96,8 @@ class QPProblem:
         sol_path = "./sol.sol"
         if "highs" in self.solver.name.lower(): 
             opt = HiGHS(solution_file=sol_path, mip_heuristic_effort=0.2, mip_detect_symmetry="on")
+        elif "gurobi" in self.solver.name.lower():
+            opt = SolverFactory(self.solver.name.lower(), solver_io="python")
         else:
             opt = SolverFactory(self.solver.name.lower())
 
