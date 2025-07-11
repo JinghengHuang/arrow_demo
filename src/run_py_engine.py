@@ -13,6 +13,10 @@ class PyEngineServer():
         self.ipaddr_rpc = "127.0.0.1"
         
     def config_loader(self):
+        """
+        Load config from config.yaml
+        will load ip and port config for Pyomo
+        """
         with open('config.yaml', 'r') as file:
             nested_data = yaml.safe_load(file)
             if nested_data["http"] is not None:
@@ -23,6 +27,14 @@ class PyEngineServer():
                 self.ipaddr_rpc = nested_data["grpc"]["ip"]
 
     def setup_custom_logger(self, name):
+        """Set custom logger for a subprocess
+
+        Args:
+            name (str): Name of the logger
+
+        Returns:
+            Logger: Logger object
+        """
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.INFO)
         handler = logging.StreamHandler(sys.stdout)
@@ -35,14 +47,17 @@ class PyEngineServer():
     
     
     def run_grpc_server(self):
+        """Start pyomo service
+        """
         logger = self.setup_custom_logger(f"worker_grpc")
         logger.info("Starting worker on gRPC server")
         grpc_serve_addr(self.ipaddr_rpc, self.grpc_port, logger)
         
     # TODO Add other service starting points here
     def start_engine_services(self) -> None:
+        """Start pyomo service in a subprocess
+        """
         grpc_thread = multiprocessing.Process(target=self.run_grpc_server, daemon=True)
-        # Fon now, only FastAPI server, expand on gRPC if needed
         grpc_thread.start()
         grpc_thread.join()
 

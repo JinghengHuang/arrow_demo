@@ -12,13 +12,25 @@ class JuliaEngineServer():
         pass
         
     def config_loader(self):
+        """
+        Load config from config.yaml
+        will load ip and port config for Julia
+        """
         with open('config.yaml', 'r') as file:
             nested_data = yaml.safe_load(file)
             if nested_data["julia"] is not None:
                 self.julia_port = int(nested_data["julia"]["port"])
                 self.ipaddr_julia = nested_data["julia"]["ip"]
 
-    def setup_custom_logger(self, name):
+    def setup_custom_logger(self, name:str):
+        """Set custom logger for a subprocess
+
+        Args:
+            name (str): Name of the logger
+
+        Returns:
+            Logger: Logger object
+        """
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.INFO)
         handler = logging.StreamHandler(sys.stdout)
@@ -31,12 +43,14 @@ class JuliaEngineServer():
     
     
     def run_julia_server(self):
-        # Using system command to run julia, requires julia environment in the system
+        """ Using system command to run julia, requires julia environment in the system
+        """
         os.system(f'julia --project=src/service/optimization_service/julia src/service/optimization_service/julia/engine.jl {self.ipaddr_julia} {self.julia_port}')
     
         
-    # TODO Add other service starting points here
     def start_engine_services(self) -> None:
+        """Run julia service in a separate process
+        """
         julia_thread = multiprocessing.Process(target=self.run_julia_server, daemon=True)
         # Fon now, only FastAPI server, expand on gRPC if needed
         julia_thread.start()
