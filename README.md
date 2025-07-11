@@ -12,7 +12,7 @@ Now integrated with poetry, and can be used to run unit tests. The best practice
 
 Currently supported solvers:
 
-    - GLPK
+    - GLPK (Not supported for QP problems)
     - CPLEX
     - GUROBI
     - HIGHS
@@ -31,6 +31,8 @@ source .venv/bin/activate
 ```
 
 ## To install dependency
+
+Install `poetry` first. See [Poetry install](https://python-poetry.org/docs/)
 
 ```bash
 # With poetry
