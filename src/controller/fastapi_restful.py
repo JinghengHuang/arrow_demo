@@ -26,7 +26,6 @@ async def compute(request: Request):
     result = endpoint.compute(payload=table)
     result = result.to_pydict()
     return {
-        "message": f"Computing model successful",
         "result": result
     }
 

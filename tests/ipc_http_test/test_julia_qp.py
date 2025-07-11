@@ -5,7 +5,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../s
 import requests,time
 import pyarrow as pa
 from utils.dict_to_pa_table import dict_to_pa_table
-
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+import random
 
 def test_julia_flow():
     url = "http://127.0.0.1:8000/compute"
@@ -46,9 +48,11 @@ def test_julia_flow():
     
     model_name ="test_qp"
     engine = "julia"
-    solver_name = "HiGHS"
-    solver_type = "QP"
-    solver_params = {"presolve": True, "dual": True, "primal": True}
+    solver_name = "Ipopt"  # Example solver name
+    # solver_name = "GLPK"  # Example solver name
+    solver_type = "QP" 
+    solver_params = {"presolve": "on","kkt_tolerance": 1e-6}  # Example solver parameters
+    solver_params = {}  # Example solver parameters for Ipopt
     
     ipc_dict = {
         "model" :{
@@ -98,4 +102,19 @@ def test_julia_flow():
     print(f"Pre request: {pre}")
     print(f"Post request: {post}")
     print(f"Time diff: {diff}")
-    
+
+# test_julia_flow()
+
+# # send 50 requests in parallel
+# async def main():
+#     loop = asyncio.get_event_loop()
+
+#     with ThreadPoolExecutor(max_workers=10) as executor: 
+#         tasks = [
+#             loop.run_in_executor(executor, test_julia_flow)
+#             for i in range(50) 
+#         ]
+#         await asyncio.gather(*tasks)
+
+# if __name__ == "__main__":
+#     asyncio.run(main())

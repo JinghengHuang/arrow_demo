@@ -1,12 +1,8 @@
 module QPModel
 
-include("solver_config.jl")
-
-using JuMP
-using HiGHS
 using SparseArrays
+using JuMP
 using LinearAlgebra
-
 # -------------------------------------------------------------------------------------------
 """
     QPproblem(Q, c, A, b, G, h, lb, ub, osense)
@@ -55,8 +51,8 @@ function build_jump_model(data)
     osense_str = data[:osense]
     osense = osense_str == "max" ? -1 : 1
 
-    solver_name = data[:solver][:solver_name]
-    solver = changeSolver(solver_name)
+    # solver_name = data[:solver][:solver_name]
+    # solver = changeSolver(solver_name)
 
     # Construct sparse matrices
     function to_sparse(mat)
@@ -73,12 +69,12 @@ function build_jump_model(data)
     G = to_sparse(G_data)
 
     # Build model
-    return buildqp(Q * osense, c * osense, A, b, G, h, lb, ub, solver.handle)
+    return buildqp(Q * osense, c * osense, A, b, G, h, lb, ub)
 end
 
 
 """
-    buildqp(Q, c, A, b, G, h, lb, ub, solver)
+    buildqp(Q, c, A, b, G, h, lb, ub)
 
 Build a JuMP QP model.
 
@@ -87,9 +83,9 @@ Returns:
 - x: JuMP.VariableRef
 - Q, c: Stored for later use
 """
-function buildqp(Q, c, A, b, G, h, lb, ub, solver)
+function buildqp(Q, c, A, b, G, h, lb, ub)
     n = length(c)
-    model = Model(solver)
+    model = Model()
 
     @variable(model, lb[i] <= x[i=1:n] <= ub[i])
 
