@@ -20,31 +20,30 @@ class GrpcComputeService(BaseService):
         client = pa.flight.connect(f"grpc://{self.gRPC_ip}:{self.gRPC_port}")
         client.as_async()
         print(client.supports_async)
-        # Upload a new dataset(test data)
-        # Not as a COO sparse matrix
-        model = load_model_from_mat(model_bin)
-        model_ipc_dict= model.to_pydict()
-        solver_ipc_dict = solver.to_pydict()
-        message_table = dict_to_pa_table(model_ipc_dict).append_column("solver", dict_to_pa_table(solver_ipc_dict))
+        # Upload a new dataset
+        if "solver" not in model_bin:
+            model_bin["solver"] = solver.__dict__
+        message_table = dict_to_pa_table(model_bin)
+        model_name = model_bin["model_name"]
         print(f"schema of message_table: {message_table.schema}")
         
         print(f"Sending model to Pyomo service: {message_table.schema.names}")
         print(f"type of each column: {[message_table.column(i).type for i in range(len(message_table.schema))]}")
         # Drop the old dataset
+        param_str = f"pyomo_params_{model_name}"
         try:
-            client.do_action(pa.flight.Action("drop_dataset", "cobra_lp_params".encode('utf-8')))
-            upload_descriptor = pa.flight.FlightDescriptor.for_path(f"cobra_lp_params")
+            client.do_action(pa.flight.Action("drop_dataset", param_str.encode('utf-8')))
+            upload_descriptor = pa.flight.FlightDescriptor.for_path(param_str)
             
             print(f"Sending Data:")
             writer, reader = client.do_put(upload_descriptor, message_table.schema, options=pa.flight.FlightCallOptions(timeout=20))
             writer.write_table(message_table)
             writer.done_writing()
             _ = reader.read()
+            get_param = "do_solver," + param_str + ",pyomo." + solver.solver_type.lower()
             # Compute the model and drop dataset from gRPC server
-            result_reader = client.do_get(ticket=pa.flight.Ticket(b"do_solver,cobra_lp_params,pyomo.cobra_lp")
-                                        #   , options=pa.flight.FlightCallOptions(timeout=20)
-                                          )
-            client.do_action(pa.flight.Action("drop_dataset", "cobra_lp_params".encode('utf-8')))
+            result_reader = client.do_get(ticket=pa.flight.Ticket(get_param.encode('utf-8')))
+            client.do_action(pa.flight.Action("drop_dataset", param_str.encode('utf-8')))
             res = result_reader.read_all()
             return res
         except Exception as e:

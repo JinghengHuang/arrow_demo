@@ -1,13 +1,12 @@
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../src")))
 
-import requests,time
 import pyarrow as pa
+import pyarrow.ipc as ipc
+import requests
+import time
+from service.optimization_service.pyomo.cobra_lp_solver import CobraLPSolver
 from utils.dict_to_pa_table import dict_to_pa_table
-
-
-def test_julia_flow():
+# Use Server to test:
+def test_pyomo():
     url = "http://127.0.0.1:8000/compute"
     
     # Quadratic term Q as native Python dict
@@ -45,7 +44,7 @@ def test_julia_flow():
 
     
     model_name ="test_qp"
-    engine = "julia"
+    engine = "pyomo"
     solver_name = "HiGHS"
     solver_type = "QP"
     solver_params = {"presolve": True, "dual": True, "primal": True}
@@ -88,14 +87,18 @@ def test_julia_flow():
     pre = time.time()
     # send the request
     response = requests.post(url, data=ipc_bytes, headers=headers)
-
-    # check the response
-    print(response.status_code)
-    print(response.content)
-    
+    assert "Error" not in str(response.content)
+    print(str(response.content))
     post = time.time()
     diff = post - pre
     print(f"Pre request: {pre}")
     print(f"Post request: {post}")
     print(f"Time diff: {diff}")
-    
+
+# No server
+# def test_pyomo_lp():
+#     
+#     # Stress test
+#     solver = CobraLPSolver()
+#     result = solver.run(dict)
+#     print(result)

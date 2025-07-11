@@ -102,7 +102,6 @@ function buildqp(Q, c, A, b, G, h, lb, ub, solver)
     if size(G, 1) > 0
         @constraint(model, G * x .<= h)
     end
-
     return model, x, Q, c
 end
 

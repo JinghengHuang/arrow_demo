@@ -13,7 +13,7 @@ class SolverConfig:
 
 class LPProblem:
     def __init__(self, S, b, c, lb, ub, osense, csense):
-        if isinstance(S, dict) and all(k in S for k in ("row", "col", "data")):
+        if isinstance(S, dict) and all(k in S for k in ("row", "col", "val")):
             # Convert to dense
             self.S = sparse_dict_to_dense(S)
         else:
@@ -63,9 +63,7 @@ class LPProblem:
         model.constraints = ConstraintList()
         
         for j in range(self.S.shape[0]):
-            print(f"Setting expression for {j}:")
             expr = sum(self.S[j, i] * model.x[i] for i in range(self.S.shape[1]))
-            print(f"Setting expression for {j} done")
             if self.csense[j] in ['E', '=']:
                 model.constraints.add(expr == self.b[j])
             elif self.csense[j] in ['L', '<']:
@@ -98,7 +96,7 @@ class LPProblem:
 
 def change_cobra_solver(name: str, params=None, print_level=1) -> SolverConfig:
     name = name.upper()
-    known_solvers = ["GLPK", "CPLEX", "GUROBI", "HIGHS", "APPSI_HIGHS"]
+    known_solvers = ["GLPK", "CPLEX", "GUROBI", "HIGHS", "APPSI_HIGHS", "IPOPT"]
     if name not in known_solvers:
         raise ValueError(f"Unsupported solver: {name}")
     return SolverConfig(name)
@@ -107,7 +105,7 @@ def change_cobra_solver(name: str, params=None, print_level=1) -> SolverConfig:
 def sparse_dict_to_dense(S_dict, shape=None):
     row = S_dict["row"]
     col = S_dict["col"]
-    data = S_dict["data"]
+    data = S_dict["val"]
     if shape is None:
         n_row = int(pc.max(row).as_py()) + 1 if row else 0
         n_col = int(pc.max(col).as_py()) + 1 if col else 0
