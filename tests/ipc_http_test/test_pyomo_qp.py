@@ -149,19 +149,20 @@ def test_pyomo_qp_gurobi():
     assert "Error" not in str(result)
     print(result)
 
-def test_pyomo_qp_cplex():
+# Maybe cplex in the future, but not now.
+# def test_pyomo_qp_cplex():
     
-    # Stress test
-    model["solver"] = {
-        "solver_name": "cplex",
-        "solver_type": "QP",
-        "solver_params": {"presolve": True, "dual": True, "primal": True}
-    }
-    solver = CobraQPSolver()
-    result = solver.run(model)
-    assert "Exception" not in str(result)
-    assert "Error" not in str(result)
-    print(result)
+#     # Stress test
+#     model["solver"] = {
+#         "solver_name": "cplex",
+#         "solver_type": "QP",
+#         "solver_params": {"presolve": True, "dual": True, "primal": True}
+#     }
+#     solver = CobraQPSolver()
+#     result = solver.run(model)
+#     assert "Exception" not in str(result)
+#     assert "Error" not in str(result)
+#     print(result)
 
 def test_pyomo_qp_ipopt():
     

@@ -46,12 +46,12 @@ import random
 #     osense = "min"
 
     
-    model_name ="test_qp"
-    engine = "julia"
-    solver_name = "HiGHS"  # Example solver name
-    # solver_name = "GLPK"  # Example solver name
-    solver_type = "QP" 
-    solver_params = {"presolve": "on","kkt_tolerance": 1e-6}  # Example solver parameters
+    # model_name ="test_qp"
+    # engine = "julia"
+    # solver_name = "HiGHS"  # Example solver name
+    # # solver_name = "GLPK"  # Example solver name
+    # solver_type = "QP" 
+    # solver_params = {"presolve": "on","kkt_tolerance": 1e-6}  # Example solver parameters
     
 #     ipc_dict = {
 #         "model" :{
@@ -88,7 +88,7 @@ import random
 #         "Content-Type": "application/vnd.apache.arrow.stream"
 #     }
 
-#     pre = time.time()
+    # pre = time.time()
 #     # send the request
 #     response = requests.post(url, data=ipc_bytes, headers=headers)
 
@@ -96,11 +96,11 @@ import random
 #     print(response.status_code)
 #     print(response.content)
     
-    post = time.time()
-    diff = post - pre
-    print(f"Pre request: {pre}")
-    print(f"Post request: {post}")
-    print(f"Time diff: {diff}")
+    # post = time.time()
+    # diff = post - pre
+    # print(f"Pre request: {pre}")
+    # print(f"Post request: {post}")
+    # print(f"Time diff: {diff}")
 
 # test_julia_flow()
 
