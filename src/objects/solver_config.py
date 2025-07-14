@@ -17,7 +17,7 @@ class SolverConfig(ArrowModel):
         """
         self.solver_name = solver_name
         self.solver_type = solver_type
-        if solver_type not in ["LP", "QP"]:
+        if solver_type.upper() not in ["LP", "QP"]:
             raise ValueError(f"Unsupported solver type: {solver_type}. Supported types are: LP, QP.")
         print(f"solver parameters: {params}")
         print(f"type of params: {type(params)}")
