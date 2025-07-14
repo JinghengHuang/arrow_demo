@@ -1,9 +1,7 @@
 module LPModel
-include("solver_config.jl")
 
-using JuMP
-using HiGHS
 using SparseArrays
+using JuMP
 #-------------------------------------------------------------------------------------------
 """
     LPproblem(A, b, c, lb, ub, osense, csense)
@@ -47,7 +45,7 @@ function build_jump_model(data)
     csense_strs = Vector{String}(data[:csense])
     osense_str = data[:osense]  # e.g. "max"
     osense = osense_str == "max" ? -1 : 1  # 1 for min which is JuMP default, -1 for max
-    solver_table = data[:solver]
+    # solver_table = data[:solver]
 
     row = Vector{Int64}(A_data[:row])
     col = Vector{Int64}(A_data[:col])
@@ -62,11 +60,11 @@ function build_jump_model(data)
     A = sparse(row .+ 1, col .+ 1, val, nrow, ncol)
 
     # c, A, sense, b, l, u, solver
-    solver_name = solver_table[:solver_name]
-    solver = changeSolver(solver_name)
+    # solver_name = solver_table[:solver_name]
+    # solver = changeSolver(solver_name)
 
     # Create the LPproblem object
-    return buildlp(c * osense, A, csense, b, lb, ub, solver.handle)
+    return buildlp(c * osense, A, csense, b, lb, ub)
 end
 
 
@@ -74,7 +72,7 @@ end
 
 #-------------------------------------------------------------------------------------------
 """
-    buildlp(c, A, sense, b, l, u, solver)
+    buildlp(c, A, sense, b, l, u)
 
 Function used to build a model using JuMP.
 
@@ -97,14 +95,14 @@ Function used to build a model using JuMP.
 # EXAMPLES
 
 ```julia
-julia> model, x, c = buildlp(c, A, sense, b, l, u, solver)
+julia> model, x, c = buildlp(c, A, sense, b, l, u)
 ```
 
 """
 
-function buildlp(c, A, sense, b, l, u, solver)
+function buildlp(c, A, sense, b, l, u)
     N = length(c)
-    model = Model(solver)
+    model = Model()
     x = @variable(model, l[i] <= x[i=1:N] <= u[i])
     @objective(model, Min, c' * x)
     eq_rows, ge_rows, le_rows = sense .== '=', sense .== '>', sense .== '<'

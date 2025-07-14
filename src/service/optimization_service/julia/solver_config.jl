@@ -1,141 +1,109 @@
+"""
+    SolverConfig
+
+A common solver configuration structure that encapsulates:
+
+- `name`:   Solver name (e.g., "HiGHS", "GLPK", etc.)
+- `type`:   Problem type (e.g., "LP", "QP", etc.)
+- `params`: Dictionary of solver parameters (Symbol => Any)
+- `handle`: Optimizer handle configured with attributes, ready to be passed to `Model(optimizer)`.
+
+# Example
+
+```julia
+params = Dict(:presolve => "off", :output_flag => true)
+cfg = SolverConfig("HiGHS", "QP", params)
+model = Model(cfg.handle)
+````
+"""
 
 """
-    SolverConfig(name, handle)
+const SOLVER_MAP
 
-Definition of a common solver type, which inclues the name of the solver and other parameters
+A dictionary mapping upper-case solver names (e.g., "HIGHS") to constructor functions
+that return a JuMP-compatible Optimizer.
 
-- `name`:           Name of the solver (alias)
-- `handle`:         Solver handle used to refer to the solver
+You can extend this with more solvers such as "MOSEK", "CLP", etc.
 
+Supported Solvers: "HIGHS", "GLPK", "GUROBI", "CPLEX"
 """
+const SOLVER_MAP = Dict(
+    "CPLEX" => () -> CPLEX.Optimizer,
+    "GLPK" => () -> GLPK.Optimizer,
+    "GUROBI" => () -> Gurobi.Optimizer,
+    "HIGHS" => () -> HiGHS.Optimizer,
+    "IPOPT" => () -> Ipopt.Optimizer,
+    "CSDP" => () -> CSDP.Optimizer,
+    "HYPATIA" => () -> Hypatia.Optimizer
+)
 
 mutable struct SolverConfig
     name::String
-    handle
-end
+    type::String
+    params::Dict{Symbol,Any}
+    handle::Any
 
+    """
+        SolverConfig(name::String, type::String, params::Dict{Symbol,Any})
 
-#-------------------------------------------------------------------------------------------
-"""
-    changeSolver(name, params, printLevel)
+    Constructor for SolverConfig.
 
-Function used to change the solver and include the respective solver interfaces
+    Automatically constructs an optimizer handle using the solver name
+    and parameters, ready to be used in JuMP `Model`.
 
-# INPUT
+    # Arguments
+    - `name`: Solver name (e.g., "HiGHS", "GUROBI")
+    - `type`: Problem type (e.g., "QP", "LP")
+    - `params`: Dictionary of raw solver parameters (`Symbol => Any`)
 
-- `name`:           Name of the solver (alias)
-
-# OPTIONAL INPUT
-
-- `params`:         Solver parameters as a row vector with tuples
-- `printLevel`:     Verbose level (default: 1). Mute all output with `printLevel = 0`.
-
-# OUTPUT
-
-- `solver`:         Solver object with a `handle` field
-
-# EXAMPLES
-
-Minimum working example (for the CPLEX solver)
-```julia
-julia> changeCobraSolver("CPLEX", cpxControl)
-```
-
-Minimum working example (for the GLPK solver)
-```julia
-julia> solverName = :GLPK
-julia> solver = changeCobraSolver(solverName)
-```
-
-"""
-
-function changeSolver(name, params=[]; printLevel::Int=1)
-    # convert type of name
-    if typeof(name) != :String
-        name = string(name)
+    # Returns
+    - A `SolverConfig` instance with a fully constructed optimizer handle.
+    """
+    function SolverConfig(name::String, type::String, params::Dict{Symbol,<:Any})
+        handle = changeSolver(name)
+        attrs = [MOI.RawOptimizerAttribute(string(k)) => v for (k, v) in params]
+        optimizer = optimizer_with_attributes(handle, attrs...)
+        new(name, type, params, optimizer)
     end
 
-    # Convert the input name to uppercase for case-insensitive matching
-    name = uppercase(name)
 
-    # define empty solver object
-    solver = SolverConfig(name, 0)
+    """
+    changeSolver(name::AbstractString; printLevel::Int = 1) -> Optimizer
 
-    # define the solver handle
-    if name == "CPLEX"
-        try
-            if abs(printLevel) > 1
-                printLevel = 1
-            end
-            solver.handle = CPLEX.Optimizer
-        catch
-            error("The solver `CPLEX` cannot be set using `changeCobraSolver()`.")
-        end
+    Returns the optimizer constructor for the given solver name. Throws an error if
+    the solver is not supported.
 
-    elseif name == "GLPK"
-        try
-            if length(params) > 1
-                solver.handle = GLPK.Optimizer
-            else
-                solver.handle = GLPK.Optimizer
-            end
-        catch
-            error("The solver `GLPK` cannot be set using `changeCobraSolver()`.")
-        end
+    # Arguments
+    name: Solver name (case-insensitive), e.g. "HiGHS", "Gurobi"
 
-    elseif name == "GUROBI"
-        try
-            # define default parameters
-            if isempty(params)
-                push!(params, -1) # default (ref: http://www.gurobi.com/documentation/8.0/refman/method.html#parameter:Method)
-                push!(params, 1) # default (ref: http://www.gurobi.com/documentation/8.0/refman/outputflag.html)
-            end
+    printLevel: (optional) Verbosity level, currently unused
 
-            # set the output flag depending on the printLevel
-            if printLevel != 1
-                params[2] = printLevel
-            end
+    # Returns
+    Optimizer constructor usable by optimizer_with_attributes
 
-            # define the solver handle
-            solver.handle = Gurobi.Optimizer
-            # solver.handle = GurobiSolver(Method=params[1], OutputFlag=params[2])
-        catch e
-            rethrow(e)
-            # error("The solver `Gurobi` cannot be set using `changeCobraSolver()`.")
-        end
-    elseif name == "HIGHS"
-        try
-            if length(params) > 1
-                solver.handle = HiGHS.Optimizer
-            else
-                solver.handle = HiGHS.Optimizer
-            end
-        catch
-            error("The solver `HiGHS` cannot be set using `changeCobraSolver()`.")
-        end
-        #=
-        elseif name == "Clp"
+    # Errors
+    Throws an error if the solver is not registered in SOLVER_MAP
+
+    # Example
+    ```julia
+    opt = changeSolver("HiGHS")
+    ````
+    """
+    function changeSolver(name::AbstractString; printLevel::Int=1)
+        println("Changing solver to: $name with print level: $printLevel")
+
+        name_upper = uppercase(name)
+
+        if haskey(SOLVER_MAP, name_upper)
             try
-                solver.handle = ClpSolver()
-            catch
-                error("The solver `Clp` cannot be set using `changeCobraSolver()`.")
+                return SOLVER_MAP[name_upper]()  # 调用构造器返回 Optimizer 类型
+            catch e
+                error("Failed to set solver `$name_upper`: $(e)")
             end
-
-        elseif name == "Mosek"
-            try
-                if printLevel == 1
-                    printLevel = 10 # default value: https://docs.mosek.com/7.1/toolbox/MSK_IPAR_LOG.html
-                end
-                solver.handle = MosekSolver(MSK_IPAR_LOG=printLevel)
-            catch
-              error("The solver `Mosek` cannot be set using `changeCobraSolver()`.")
-            end
-        =#
-    else
-        solver.handle = -1
-        error("The solver is not supported. Please set the solver name to one the supported solvers.")
+        else
+            error("Solver `$name_upper` is not supported. Please choose from: $(keys(SOLVER_MAP))")
+        end
     end
 
-    return solver
 
 end

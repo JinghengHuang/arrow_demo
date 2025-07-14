@@ -16,9 +16,9 @@ def test_julia_flow():
         "model_name": "test_lp",
         "engine": "julia",
         "solver": {
-            "solver_name": "Highs",
+            "solver_name": "GLPK",
             "solver_type": "LP",
-            "solver_params": {"presolve": True, "dual": True, "primal": True}
+            "solver_params": {}
         }  
     }
     
@@ -54,4 +54,4 @@ def test_julia_flow():
     
 
 
-test_julia_flow()
+# test_julia_flow()
