@@ -78,3 +78,123 @@ Objective value     :  1.5000000000e+00
 P-D objective error :  1.2499999768e-08
 HiGHS run time      :          0.00
 Writing the solution to ./sol.sol
+Running HiGHS 1.11.0 (git hash: 364c83a51e): Copyright (c) 2025 HiGHS under MIT licence terms
+Set option log_file to "HiGHS.log"
+Set option solution_file to "./sol.sol"
+Set option mip_heuristic_effort to 0.2
+QP   model1752569059615972100 has 3 rows; 2 cols; 4 matrix nonzeros; 2 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [1e+00, 1e+00]
+  Bound  [1e+01, 1e+01]
+  RHS    [1e+00, 1e+00]
+  Iteration        Objective     NullspaceDim
+          0                2                0      0.00s
+          2              1.5                1      0.00s
+Model name          : model1752569059615972100
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  1.5000000000e+00
+P-D objective error :  1.2499999768e-08
+HiGHS run time      :          0.00
+Writing the solution to ./sol.sol
+Running HiGHS 1.11.0 (git hash: 364c83a51e): Copyright (c) 2025 HiGHS under MIT licence terms
+Set option log_file to "HiGHS.log"
+Set option solution_file to "./sol.sol"
+Set option mip_heuristic_effort to 0.2
+QP   model1752569060284207600 has 3 rows; 2 cols; 4 matrix nonzeros; 2 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [1e+00, 1e+00]
+  Bound  [1e+01, 1e+01]
+  RHS    [1e+00, 1e+00]
+  Iteration        Objective     NullspaceDim
+          0                2                0      0.00s
+          2              1.5                1      0.00s
+Model name          : model1752569060284207600
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  1.5000000000e+00
+P-D objective error :  1.2499999768e-08
+HiGHS run time      :          0.00
+Writing the solution to ./sol.sol
+Running HiGHS 1.11.0 (git hash: 364c83a51e): Copyright (c) 2025 HiGHS under MIT licence terms
+Set option log_file to "HiGHS.log"
+Set option solution_file to "./sol.sol"
+Set option mip_heuristic_effort to 0.2
+QP   model1752569892701531400 has 3 rows; 2 cols; 4 matrix nonzeros; 2 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [1e+00, 1e+00]
+  Bound  [1e+01, 1e+01]
+  RHS    [1e+00, 1e+00]
+  Iteration        Objective     NullspaceDim
+          0                2                0      0.00s
+          2              1.5                1      0.00s
+Model name          : model1752569892701531400
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  1.5000000000e+00
+P-D objective error :  1.2499999768e-08
+HiGHS run time      :          0.00
+Writing the solution to ./sol.sol
+Running HiGHS 1.11.0 (git hash: 364c83a51e): Copyright (c) 2025 HiGHS under MIT licence terms
+Set option log_file to "HiGHS.log"
+Set option solution_file to "./sol.sol"
+Set option mip_heuristic_effort to 0.2
+QP   model1752569893049436700 has 3 rows; 2 cols; 4 matrix nonzeros; 2 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [1e+00, 1e+00]
+  Bound  [1e+01, 1e+01]
+  RHS    [1e+00, 1e+00]
+  Iteration        Objective     NullspaceDim
+          0                2                0      0.00s
+          2              1.5                1      0.00s
+Model name          : model1752569893049436700
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  1.5000000000e+00
+P-D objective error :  1.2499999768e-08
+HiGHS run time      :          0.00
+Writing the solution to ./sol.sol
+Running HiGHS 1.11.0 (git hash: 364c83a51e): Copyright (c) 2025 HiGHS under MIT licence terms
+Set option log_file to "HiGHS.log"
+Set option solution_file to "./sol.sol"
+Set option mip_heuristic_effort to 0.2
+QP   model1752570681518940200 has 3 rows; 2 cols; 4 matrix nonzeros; 2 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [1e+00, 1e+00]
+  Bound  [1e+01, 1e+01]
+  RHS    [1e+00, 1e+00]
+  Iteration        Objective     NullspaceDim
+          0                2                0      0.00s
+          2              1.5                1      0.00s
+Model name          : model1752570681518940200
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  1.5000000000e+00
+P-D objective error :  1.2499999768e-08
+HiGHS run time      :          0.00
+Writing the solution to ./sol.sol
+Running HiGHS 1.11.0 (git hash: 364c83a51e): Copyright (c) 2025 HiGHS under MIT licence terms
+Set option log_file to "HiGHS.log"
+Set option solution_file to "./sol.sol"
+Set option mip_heuristic_effort to 0.2
+QP   model1752570681870653600 has 3 rows; 2 cols; 4 matrix nonzeros; 2 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [1e+00, 1e+00]
+  Bound  [1e+01, 1e+01]
+  RHS    [1e+00, 1e+00]
+  Iteration        Objective     NullspaceDim
+          0                2                0      0.00s
+          2              1.5                1      0.00s
+Model name          : model1752570681870653600
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  1.5000000000e+00
+P-D objective error :  1.2499999768e-08
+HiGHS run time      :          0.00
+Writing the solution to ./sol.sol
