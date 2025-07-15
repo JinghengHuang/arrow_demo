@@ -97,3 +97,23 @@ class LPModel(ArrowModel):
 
         # 4. Check osense
         check_objective_sense(self.osense)
+        
+        
+    # static method to create an LPModel from a dictionary representation
+    @classmethod
+    def from_dict(cls, model_dict: dict) -> "LPModel":
+        """
+        Create an LPModel instance from a dictionary representation.
+
+        :param model_dict: Dictionary with keys 'A', 'b', 'c', 'lb', 'ub', 'osense', 'csense'
+        :return: LPModel instance
+        """
+        A = pa.RecordBatch.from_pydict(model_dict["A"])
+        b = pa.array(model_dict["b"])
+        c = pa.array(model_dict["c"])
+        lb = pa.array(model_dict.get("lb", []))
+        ub = pa.array(model_dict.get("ub", []))
+        osense = pa.scalar(model_dict.get("osense", "min"), type=pa.string())
+        csense = pa.array(model_dict.get("csense", ["E"] * len(b)), type=pa.string())
+        
+        return cls(A, b, c, lb, ub, osense, csense)

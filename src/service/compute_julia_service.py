@@ -19,7 +19,7 @@ class JuliaComputeService(BaseService):
             client_socket.connect((self.julia_ip, self.julia_port))
             # Send the model binary to the Julia service
             # model = load_model_from_mat(model_bin)
-            model_ipc_dict= model_bin
+            model_ipc_dict= model_bin.to_pydict()
             
             solver_ipc_dict = solver.to_pydict()
             message_table = dict_to_pa_table(model_ipc_dict).append_column("solver", dict_to_pa_table(solver_ipc_dict))

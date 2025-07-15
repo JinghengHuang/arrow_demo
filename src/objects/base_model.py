@@ -19,3 +19,11 @@ class ArrowModel(ABC):
         Should raise ValueError or TypeError if checks fail.
         """
         pass
+    
+    @classmethod
+    def from_dict(cls, model_dict: dict) -> "ArrowModel":
+        """
+        Create an ArrowModel instance from a dictionary representation.
+        Subclasses should implement this method to handle their specific fields.
+        """
+        raise NotImplementedError("Subclasses must implement from_dict method")

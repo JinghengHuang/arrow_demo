@@ -1,7 +1,7 @@
 import pyarrow as pa
 import pyarrow.compute as pc
 from .base_model import ArrowModel
-from ..utils.model_sanity_check import check_arrow_coo_matrix, check_variable_bounds
+from utils.model_sanity_check import check_arrow_coo_matrix, check_variable_bounds
 
 class QPModel(ArrowModel):
     """
@@ -89,3 +89,24 @@ class QPModel(ArrowModel):
 
         # osense
         check_objective_sense(self.osense)
+        
+        
+    @classmethod
+    def from_dict(model_dict: dict) -> "QPModel":
+        """
+        Create a QPModel instance from a dictionary representation.
+        Expects keys: "Q", "c", "A", "b", "G", "h", "lb", "ub", "osense".
+        :param model_dict: Dictionary with keys corresponding to QP components
+        :return: QPModel instance
+        """
+        Q = model_dict.get("Q")
+        c = model_dict.get("c")
+        A = model_dict.get("A")
+        b = model_dict.get("b")
+        G = model_dict.get("G", None)
+        h = model_dict.get("h", None)
+        lb = model_dict.get("lb", None)
+        ub = model_dict.get("ub", None)
+        osense = model_dict.get("osense", pa.scalar("min", type=pa.string()))
+
+        return QPModel(Q=Q, c=c, A=A, b=b, G=G, h=h, lb=lb, ub=ub, osense=osense)

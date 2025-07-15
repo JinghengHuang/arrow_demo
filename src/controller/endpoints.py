@@ -2,9 +2,12 @@ import json
 from typing import List, Dict, Optional, Union
 from utils.mat_parser import load_model_from_mat
 from objects.lp_model import LPModel
+from objects.qp_model import QPModel
 from objects.solver_config import SolverConfig
 import service
 from service.service_factory import ServiceFactory
+import pyarrow as pa
+
 """
 Endpoints of all the exposed APIs, in logical layer
 gRPC and potentially HTTP services all calls these to reduce duplication of efforts
@@ -58,25 +61,39 @@ class Endpoint:
             - dataId or data
             - dataName (optional)
         :return: Dict with result metadata and output
-        """        
-        model_name = payload.column("model_name")[0].as_py()
-        engine = payload.column("engine")[0].as_py()
-        solver = payload.column("solver")[0].as_py()
-        service = self.service_factory.create_service(engine)
-        # Note: solver is a dictionary, we can access its fields directly
-        if isinstance(solver, dict):
-            solver_name = solver.get("solver_name", None)
-            solver_type = solver.get("solver_type", None)
-            solver_params = solver.get("solver_params", None)
-        solver = SolverConfig(
-                solver_name=solver_name,
-                solver_type=solver_type,
-                params= solver_params
+        """
+        try:    
+            model_name = payload.column("model_name")[0].as_py()
+            engine = payload.column("engine")[0].as_py()
+            service = self.service_factory.create_service(engine)
+            # Note: solver is a dictionary, we can access its fields directly
+            solver = SolverConfig.from_dict(payload.column("solver")[0].as_py())
+            #use case when for solver_type to form model
+            model = None
+            if solver.solver_type.lower() == "lp":
+                model = LPModel.from_dict(payload.column("model")[0].as_py())
+            elif solver.solver_type.lower() == "qp":
+                model = QPModel.from_dict(payload.column("model")[0].as_py())
+            result = service.compute(model, solver)
+            if result.column("success")[0].as_py():
+                return True, pa.RecordBatch.from_pydict({
+                    "solution": [result.column("solution")[0].as_py()],
+                    "objective_value": [result.column("objective_value")[0].as_py()],
+                })
+            return False, pa.RecordBatch.from_pydict({
+                    "error_code": [500],
+                    "error_message": [result.column("error_message")[0].as_py()]
+                })
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            print(f"Error in compute: {e}")
+            return False, pa.RecordBatch.from_pydict(
+                {
+                    "error_code": [400],
+                    "error_message": [f'{type(e).__name__}: {str(e)}']
+                }
             )
-        map = payload.column("model")[0].as_py()
-        map["model_name"] = model_name
-        result = service.compute(map, solver)
-        return result
 
     def compute_cobra(self, payload: Dict) -> Dict:
         """

@@ -24,23 +24,22 @@ async def compute(request: Request):
     raw = await request.body()
     reader = pa.ipc.open_stream(raw)
     table = reader.read_all()
-    result = endpoint.compute(payload=table)
-    result_dict = result.to_pydict()
-    if result_dict.get("success")[0]:
+    success, result = endpoint.compute(payload=table)
+    if success:
         sink = pa.BufferOutputStream()
         with pa.ipc.new_stream(sink, result.schema) as writer:
             writer.write(result)
         ipc_bytes = sink.getvalue().to_pybytes()
         return Response(
-        content = ipc_bytes,
-        status_code = 200,
-        media_type= "application/vnd.apache.arrow.stream"
+            content = ipc_bytes,
+            status_code = 200,
+            media_type= "application/vnd.apache.arrow.stream"
         )
     else:
         return Response(
-        content = result_dict.get("error_message")[0],
-        status_code = 500,
-        media_type= "application/vnd.apache.arrow.stream"
+            content = result.column("error_message")[0].as_py(),
+            status_code = result.column("error_code")[0].as_py(),
+            media_type= "application/vnd.apache.arrow.stream"
         )
 
 @app.post("/saveModel")
