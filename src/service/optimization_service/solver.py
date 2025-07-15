@@ -7,7 +7,24 @@ class BaseSolver:
         pass
 
     def run(self, params:pa.Table) -> pa.Table:
+        """Run solver based on ArrowTable parameter
+
+        Args:
+            params (pa.Table): model parameter
+
+        Returns:
+            pa.Table: results
+        """
         pass
     # Generalized, use a dict (from a json)
     def run(self, params:dict) -> dict:
+        
+        """Run solver based on dict parameter
+
+        Args:
+            params (dict): model parameter
+
+        Returns:
+            dict: results
+        """
         pass

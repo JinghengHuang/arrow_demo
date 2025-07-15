@@ -15,6 +15,17 @@ class ServiceFactory():
         pass
     
     def create_service(self, name: str) -> BaseService:
+        """Create a type of concrete service
+
+        Args:
+            name (str): Name of the service
+
+        Raises:
+            NameError: Wrong service name or name is empty
+
+        Returns:
+            BaseService: Service instance of a type determined by name
+        """
         try:
             if name is not None and name != "":
                 return self._service_map[name]

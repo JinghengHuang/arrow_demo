@@ -13,6 +13,10 @@ class GatewayServer():
         self.ipaddr_rpc = "127.0.0.1"
         
     def config_loader(self):
+        """
+        Load config from config.yaml
+        will load ip and port config for HTTP Server
+        """
         with open('config.yaml', 'r') as file:
             nested_data = yaml.safe_load(file)
             if nested_data["http"] is not None:
@@ -23,6 +27,14 @@ class GatewayServer():
                 self.ipaddr_rpc = nested_data["grpc"]["ip"]
 
     def setup_custom_logger(self, name):
+        """Set custom logger for a subprocess
+
+        Args:
+            name (str): Name of the logger
+
+        Returns:
+            Logger: Logger object
+        """
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.INFO)
         handler = logging.StreamHandler(sys.stdout)
@@ -34,6 +46,8 @@ class GatewayServer():
         return self.logger
 
     def run_server(self):
+        """Start FastAPI server via uvicorn
+        """
         self.logger = self.setup_custom_logger(f"worker_fastAPI")
         self.logger.info("Starting worker on FastAPI")
         uvicorn.run("controller.fastapi_restful:app",
@@ -43,6 +57,8 @@ class GatewayServer():
                     access_log=True)
         
     def run_server_multiprocessing(self):
+        """Start FastAPI server in a subprocess
+        """
         server_thread = multiprocessing.Process(target=self.run_server, daemon=False)
         server_thread.start()
         server_thread.join()
