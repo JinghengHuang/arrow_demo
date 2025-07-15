@@ -5,11 +5,7 @@ import pyarrow.compute as pc
 from gethighs import HiGHS
 import os
 import gc
-
-class SolverConfig:
-    def __init__(self, name, handle=None):
-        self.name = name.upper()
-        self.handle = handle
+from utils.pyomo_utils import *
 
 class QPProblem:
     def __init__(self, A, G, Q, b, c, h, lb, osense, ub):
@@ -90,18 +86,20 @@ class QPProblem:
         self.model = model
         self.solver = solver
 
-    def solve(self):
+    def solve(self, solver_params=None):
         if self.model is None or self.solver is None:
             raise RuntimeError("Model not built or solver not assigned.")
         sol_path = "./sol.sol"
         if "highs" in self.solver.name.lower(): 
-            opt = HiGHS(solution_file=sol_path, mip_heuristic_effort=0.2, mip_detect_symmetry="on")
-        elif "gurobi" in self.solver.name.lower():
-            opt = SolverFactory(self.solver.name.lower(), solver_io="python")
+            opt = HiGHS(solution_file=sol_path, **solver_params)
+            result = opt.solve(self.model)
         else:
             opt = SolverFactory(self.solver.name.lower())
+            if solver_params is not None:
+                result = opt.solve(self.model, solver_options=solver_params)
+            else:
+                result = opt.solve(self.model)
 
-        result = opt.solve(self.model)
         if "highs" in self.solver.name.lower(): 
             self.status = str(opt.status)
             print(opt)
@@ -152,25 +150,3 @@ class QPProblem:
             elif result.solver.termination_condition == TerminationCondition.infeasible:
                 self.solution = "Infeasible"
                 self.objective_value = None
-
-
-def change_cobra_solver(name: str, params=None, print_level=1) -> SolverConfig:
-    name = name.upper()
-    known_solvers = ["GLPK", "CPLEX", "GUROBI", "HIGHS", "APPSI_HIGHS", "IPOPT"]
-    if name not in known_solvers:
-        raise ValueError(f"Unsupported solver: {name}")
-    return SolverConfig(name)
-
-
-def sparse_dict_to_dense(S_dict, shape=None):
-    row = S_dict["row"]
-    col = S_dict["col"]
-    data = S_dict["val"]
-    if shape is None:
-        n_row = int(pc.max(row).as_py()) + 1 if row else 0
-        n_col = int(pc.max(col).as_py()) + 1 if col else 0
-        shape = (n_row, n_col)
-    dense = np.zeros(shape)
-    for r, c, v in zip(row, col, data):
-        dense[r, c] = v
-    return dense
