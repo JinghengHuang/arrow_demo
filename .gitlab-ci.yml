@@ -27,7 +27,7 @@ test:
   before_script:
     - apt-get update && apt-get install -y curl
     # GLPK
-    - apt-get install -y libglpk-dev
+    - apt-get install -y libglpk-dev glpk-utils
     - glpsol --version
 
     - apt-get install -y gcc g++ gfortran git patch wget pkg-config liblapack-dev libmetis-dev
