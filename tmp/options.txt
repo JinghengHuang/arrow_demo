@@ -1,0 +1,3 @@
+mip_heuristic_effort = 0.2
+mip_detect_symmetry = on
+log_file = HiGHS.log

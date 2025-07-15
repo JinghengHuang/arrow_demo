@@ -5,6 +5,7 @@ from fastapi import Request
 import io
 from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import StreamingResponse
+from fastapi.responses import Response
 from controller.endpoints import *
 
 app = FastAPI()
@@ -24,10 +25,23 @@ async def compute(request: Request):
     reader = pa.ipc.open_stream(raw)
     table = reader.read_all()
     result = endpoint.compute(payload=table)
-    result = result.to_pydict()
-    return {
-        "result": result
-    }
+    result_dict = result.to_pydict()
+    if result_dict.get("success")[0]:
+        sink = pa.BufferOutputStream()
+        with pa.ipc.new_stream(sink, result.schema) as writer:
+            writer.write(result)
+        ipc_bytes = sink.getvalue().to_pybytes()
+        return Response(
+        content = ipc_bytes,
+        status_code = 200,
+        media_type= "application/vnd.apache.arrow.stream"
+        )
+    else:
+        return Response(
+        content = result_dict.get("error_message")[0],
+        status_code = 500,
+        media_type= "application/vnd.apache.arrow.stream"
+        )
 
 @app.post("/saveModel")
 async def save(model_id: Annotated[Optional[str], Form()] = None, 
