@@ -1,7 +1,7 @@
 # import sys
 # import os
 # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../src")))
-
+import utils.network_check as ncheck
 import requests,time
 import pyarrow as pa
 from utils.dict_to_pa_table import dict_to_pa_table
@@ -18,6 +18,10 @@ with open("tests/ipc_http_test/qp.json", "r") as f:
 
 @pytest.mark.parametrize("solver", solvers)
 def test_julia_flow(solver):
+    
+    
+    if ncheck.check_socket("127.0.0.1", 8000) is False:
+        pytest.skip("Server is not started")
     url = "http://127.0.0.1:8000/compute"
     
     ipc_dict = {
