@@ -73,7 +73,8 @@ dependencies = [
     "highspy (>=1.11.0,<2.0.0)",
     "gethighs @ git+https://github.com/bruscalia/gethighs",
     "gurobipy (>=12.0.2,<13.0.0)",
-    "pytest (>=8.4.1,<9.0.0)"
+    "pytest (>=8.4.1,<9.0.0)",
+    "pytest-timeout (>=2.4.0,<3.0.0)"
 ]
 
 
