@@ -20,18 +20,35 @@ stages:
   - test
 
 test:
-  image: python:3.12-slim  # 使用包含 Python 的官方镜像
+  image: python:3.12-slim 
   stage: test
   variables:
     POETRY_VERSION: "2.1.3"
   before_script:
     - apt-get update && apt-get install -y curl
+    - apt-get install glpk-utils libglpk-dev glpk-doc python-glpk
+    - apt-get install gcc g++ gfortran git patch wget pkg-config liblapack-dev libmetis-dev
+    # IPOPT
+    - export IPOPT_BASE=/opt/ipopt
+    - mkdir -p $IPOPT_BASE
+    - cd /tmp
+    - wget https://www.coin-or.org/download/source/Ipopt/Ipopt-${IPOPT_VERSION}.zip
+    - unzip Ipopt-${IPOPT_VERSION}.zip
+    - cd Ipopt-${IPOPT_VERSION}
+    - cd ThirdParty/Blas && ./get.Blas && cd ../..
+    - cd ThirdParty/Lapack && ./get.Lapack && cd ../..
+    - cd ThirdParty/ASL && ./get.ASL && cd ../..
+    - cd ThirdParty/Mumps && ./get.Mumps && cd ../..
+    - ./configure --prefix=$IPOPT_BASE --with-pic
+    - make -j"$(nproc)" && make test && make install
+    - export LD_LIBRARY_PATH="$IPOPT_BASE/lib:$LD_LIBRARY_PATH"
+    - export PATH="$IPOPT_BASE/bin:$PATH"
+    # Poetry
     - curl -sSL https://install.python-poetry.org | python3 -
     - export PATH="$HOME/.local/bin:$PATH"
     - poetry config virtualenvs.create true
     - poetry install --no-interaction --no-ansi --no-root
-    # 激活 Poetry 创建的虚拟环境
-    - source `poetry env info --path`/bin/activate  # ⟵ 关键：激活环境 :contentReference[oaicite:1]{index=1}
+    - source `poetry env info --path`/bin/activate
   script:
     - poetry run pytest --junitxml=reports/junit.xml --timeout=5
   artifacts:
