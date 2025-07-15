@@ -16,25 +16,48 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Getting-Started.gitlab-ci.yml
 
-stages:          # List of stages for jobs, and their order of execution
-  - build
+stages:
+  - install
   - test
-  - deploy
 
-build-job:       # This job runs in the build stage, which runs first.
-  stage: build
-  script:
-    - echo "Compiling the code..."
-    - echo "Compile complete."
+variables:
+  POETRY_VERSION: "1.8.2"  # 你可以替换为你项目使用的版本
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  POETRY_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pypoetry"
+  VENV_PATH: "$CI_PROJECT_DIR/.venv"
 
-unit-test-job:   # This job runs in the test stage.
-  stage: test    # It only starts when the job in the build stage completes successfully.
-  script:
-    - poetry run pytest -s
+cache:
+  paths:
+    - .cache/pip
+    - .cache/pypoetry
+    - .venv
 
-deploy-job:      # This job runs in the deploy stage.
-  stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
-  environment: production
+before_script:
+  - python --version
+  - curl -sSL https://install.python-poetry.org | python3 - --version $POETRY_VERSION
+  - export PATH="$HOME/.local/bin:$PATH"
+  - poetry config virtualenvs.in-project true
+  - poetry install
+
+install-dependencies:
+  stage: install
   script:
-    - echo "Deploying application..."
-    - echo "Application successfully deployed."
+    - echo "Dependencies installed by poetry in install stage"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"'
+
+test:
+  stage: test
+  script:
+    - export PATH="$HOME/.local/bin:$PATH"
+    - poetry run pytest --junitxml=reports/junit.xml --cov=. --cov-report=xml --cov-report=html
+  artifacts:
+    when: always
+    paths:
+      - reports/
+      - htmlcov/
+      - coverage.xml
+    reports:
+      junit: reports/junit.xml
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"'
