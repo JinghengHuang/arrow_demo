@@ -33,12 +33,10 @@ test:
     # 激活 Poetry 创建的虚拟环境
     - source `poetry env info --path`/bin/activate  # ⟵ 关键：激活环境 :contentReference[oaicite:1]{index=1}
   script:
-    - pytest --junitxml=reports/junit.xml --cov=. --cov-report=xml --cov-report=html
+    - poetry run pytest --junitxml=reports/junit.xml
   artifacts:
     when: always
     paths:
       - reports/
-      - htmlcov/
-      - coverage.xml
     reports:
       junit: reports/junit.xml
