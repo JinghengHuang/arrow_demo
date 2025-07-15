@@ -36,11 +36,13 @@ class CobraLPSolver(BaseSolver):
             lp.build_lp(solver)
             lp.solve(solver_params)
             return {
+                "success": True,
                 "solution": lp.solution,
                 "status": lp.status,
                 "obj_val": lp.objective_value
             }
         except Exception as e:
             return {
-                "Exception:": str(e)
+                "success": False,
+                "error_message:": str(e)
             }

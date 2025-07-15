@@ -64,6 +64,11 @@ class Endpoint:
         solver = payload.column("solver")[0].as_py()
         service = self.service_factory.create_service(engine)
         # Note: solver is a dictionary, we can access its fields directly
+        
+        map = payload.column("model")[0].as_py()
+        map["model_name"] = model_name
+        map["solver"] = solver
+        
         if isinstance(solver, dict):
             solver_name = solver.get("solver_name", None)
             solver_type = solver.get("solver_type", None)
@@ -73,8 +78,6 @@ class Endpoint:
                 solver_type=solver_type,
                 params= solver_params
             )
-        map = payload.column("model")[0].as_py()
-        map["model_name"] = model_name
         result = service.compute(map, solver)
         return result
 

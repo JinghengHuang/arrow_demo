@@ -52,11 +52,12 @@ test:
     - poetry config virtualenvs.create true
     - poetry install --no-interaction --no-ansi --no-root
     - source `poetry env info --path`/bin/activate
+    - sh startAll
   script:
-    - poetry run pytest --junitxml=reports/junit.xml --timeout=5
+    - poetry run pytest --junitxml=junit.xml --timeout=5
   artifacts:
     when: always
     paths:
-      - reports/
+      - ./
     reports:
-      junit: reports/junit.xml
+      junit: junit.xml
