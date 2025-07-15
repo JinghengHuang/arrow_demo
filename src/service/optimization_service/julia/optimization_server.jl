@@ -2,7 +2,7 @@ module OptimizationServer
 
 # === Core Packages ===
 using JuMP
-using HiGHS, Ipopt, CSDP, GLPK, Hypatia
+using HiGHS, Ipopt, CSDP, GLPK, Hypatia, Gurobi, MosekTools, Mosek
 using Sockets
 using SparseArrays
 
@@ -99,7 +99,7 @@ function handle_optimization_request(client)
         start_time = time()
         status, objval, sol = solve(model, x)
         end_time = time()
-        @info "Time taken to solve the LP problem in COBRA.jl: $(end_time - start_time) seconds."
+        @info "Time taken to solve the $(optimizer.type) problem in COBRA.jl: $(end_time - start_time) seconds."
         send_success_result(client, status, objval, sol)
     catch e
         @error "Error handling optimization request: $(e)"

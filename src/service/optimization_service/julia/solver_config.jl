@@ -23,18 +23,18 @@ const SOLVER_MAP
 A dictionary mapping upper-case solver names (e.g., "HIGHS") to constructor functions
 that return a JuMP-compatible Optimizer.
 
-You can extend this with more solvers such as "MOSEK", "CLP", etc.
+You can extend this with more solvers such as "MOSEK", etc.
 
-Supported Solvers: "HIGHS", "GLPK", "GUROBI", "CPLEX"
+Supported Solvers: "HIGHS", "GLPK", "GUROBI", "IPOPT", "CSDP", "HYPATIA", "MOSEK"
 """
 const SOLVER_MAP = Dict(
-    "CPLEX" => () -> CPLEX.Optimizer,
     "GLPK" => () -> GLPK.Optimizer,
     "GUROBI" => () -> Gurobi.Optimizer,
     "HIGHS" => () -> HiGHS.Optimizer,
     "IPOPT" => () -> Ipopt.Optimizer,
     "CSDP" => () -> CSDP.Optimizer,
-    "HYPATIA" => () -> Hypatia.Optimizer
+    "HYPATIA" => () -> Hypatia.Optimizer,
+    "MOSEK" => () -> Mosek.Optimizer,
 )
 
 mutable struct SolverConfig

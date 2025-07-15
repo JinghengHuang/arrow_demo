@@ -1,7 +1,11 @@
+import sys, pytest
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../src")))
 
 import pytest
 import utils.network_check as ncheck
 import requests,time
+from time import sleep
 import pyarrow as pa
 from utils.dict_to_pa_table import dict_to_pa_table
 
@@ -14,14 +18,10 @@ def test_julia_flow():
     url = "http://127.0.0.1:8000/compute"
     
     ipc_dict = {
-        "model" : dict,
+        "model" : model_data,
         "model_name": "test_lp",
         "engine": "julia",
-        "solver": {
-            "solver_name": "GLPK",
-            "solver_type": "LP",
-            "solver_params": {}
-        }  
+        "solver": solver  
     }
     
     ipc_table = dict_to_pa_table(ipc_dict)
@@ -54,6 +54,7 @@ def test_julia_flow():
     print(f"Post request: {post}")
     print(f"Time diff: {diff}")
     
-
-
-# test_julia_flow()
+# for solver in solvers:
+#     if solver["solver_name"] == "HiGHS":
+#         test_julia_flow(solver)  # Run the test for each solver
+#         sleep(10)  # Optional: sleep to avoid overwhelming the server with requests

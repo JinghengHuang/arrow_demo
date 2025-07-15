@@ -1,0 +1,34 @@
+
+{
+    "model_data" : {
+        "Q" : { 
+            "row": [0, 1],
+            "col": [0, 1],
+            "val": [2.0, 2.0]
+        },
+        "c" :[1.0, 1.0],
+        "A" : {
+            "row": [0, 0],
+            "col": [0, 1],
+            "val": [1.0, 1.0]
+            },
+        "b" : [1.0],
+        "G" : {
+            "row": [0, 1],
+            "col": [0, 1],
+            "val": [-1.0, -1.0]
+        },
+        "h" : [0.0, 0.0],
+        "lb" : [0.0, 0.0],
+        "ub" : [10.0, 10.0],
+        "osense" : "min"
+    },
+    "solvers": [
+        {"solver_name": "Gurobi", "solver_type": "QP", "solver_params": {}},
+        {"solver_name": "HiGHS", "solver_type": "QP", "solver_params": {}},
+        {"solver_name": "MOSEK", "solver_type": "QP", "solver_params": {}},
+        {"solver_name": "CSDP", "solver_type": "QP", "solver_params": {}},
+        {"solver_name": "Ipopt", "solver_type": "QP", "solver_params": {}},
+        {"solver_name": "Hypatia", "solver_type": "QP", "solver_params": {}}
+    ]
+}

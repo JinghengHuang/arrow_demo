@@ -2,7 +2,7 @@
 
 julia_version = "1.11.5"
 manifest_format = "2.0"
-project_hash = "cdbc9e9f8d39a4be39f5c9e9304a27dd154f90b0"
+project_hash = "5fb771b01bb5da1a3007721e4dc7047d59ce5a03"
 
 [[deps.ASL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -51,6 +51,17 @@ deps = ["Artifacts", "JLLWrappers", "Libdl"]
 git-tree-sha1 = "1b96ea4a01afe0ea4090c5c8039690672dd13f2e"
 uuid = "6e34b625-4abd-537c-b88f-471c36dfa7a0"
 version = "1.0.9+0"
+
+[[deps.CEnum]]
+git-tree-sha1 = "389ad5c84de1ae7cf0e28e381131c98ea87d54fc"
+uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
+version = "0.5.0"
+
+[[deps.CPLEX]]
+deps = ["CEnum", "Libdl", "MathOptInterface", "SparseArrays"]
+git-tree-sha1 = "36590867625f14e47196678cd2028b0956e2101d"
+uuid = "a076750e-1247-5638-91d2-ce28b192dca0"
+version = "1.1.1"
 
 [[deps.CSDP]]
 deps = ["CSDP_jll", "LinearAlgebra", "MathOptInterface", "SparseArrays"]
@@ -243,6 +254,18 @@ deps = ["LinearAlgebra", "Printf", "Random", "libblastrampoline_jll"]
 git-tree-sha1 = "ad599869948d79efd63a030c970e2c6e21fecf4a"
 uuid = "14197337-ba66-59df-a3e3-ca00e7dcff7a"
 version = "0.3.17"
+
+[[deps.Gurobi]]
+deps = ["Gurobi_jll", "Libdl", "MathOptInterface", "PrecompileTools"]
+git-tree-sha1 = "a39349533a3fe9f60cf05e1a56644f804473c46a"
+uuid = "2e9cd046-0924-5485-92f1-d5272153d98b"
+version = "1.7.5"
+
+[[deps.Gurobi_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "0306382a5f266e08e48ccfd4ea2e05d61155a055"
+uuid = "c018c7e6-a5b0-4aea-8f80-9c1ef9991411"
+version = "12.0.2"
 
 [[deps.HiGHS]]
 deps = ["HiGHS_jll", "MathOptInterface", "PrecompileTools", "SparseArrays"]
@@ -501,6 +524,18 @@ deps = ["Compat", "ExprTools"]
 git-tree-sha1 = "2c140d60d7cb82badf06d8783800d0bcd1a7daa2"
 uuid = "78c3b35d-d492-501b-9361-3d52fe80e533"
 version = "0.8.1"
+
+[[deps.Mosek]]
+deps = ["Libdl", "Pkg", "Printf", "SparseArrays"]
+git-tree-sha1 = "ea661427c5951c3de663550b637165ecd38febb2"
+uuid = "6405355b-0ac2-5fba-af84-adbd65488c0e"
+version = "11.0.1"
+
+[[deps.MosekTools]]
+deps = ["MathOptInterface", "Mosek"]
+git-tree-sha1 = "657c17e52a3abeaa98a550232bd6dac459512dcd"
+uuid = "1ec41992-ff65-5c91-ac43-2df89e9693a4"
+version = "0.15.9"
 
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
