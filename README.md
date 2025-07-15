@@ -13,7 +13,6 @@ Now integrated with poetry, and can be used to run unit tests. The best practice
 Currently supported solvers:
 
     - GLPK (Not supported for QP problems)
-    - CPLEX
     - GUROBI
     - HIGHS
     - IPOPT

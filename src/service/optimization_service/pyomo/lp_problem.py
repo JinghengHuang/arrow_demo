@@ -4,12 +4,7 @@ from pyomo.opt import SolverStatus, TerminationCondition
 import pyarrow.compute as pc
 import os
 import gc
-
-class SolverConfig:
-    def __init__(self, name, handle=None):
-        self.name = name.upper()
-        self.handle = handle
-
+from utils.pyomo_utils import *
 
 class LPProblem:
     def __init__(self, S, b, c, lb, ub, osense, csense):
@@ -75,45 +70,23 @@ class LPProblem:
         self.model = model
         self.solver = solver
 
-    def solve(self):
+    def solve(self, solver_params=None):
         if self.model is None or self.solver is None:
             raise RuntimeError("Model not built or solver not assigned.")
-
-        if "gurobi" in self.solver.name.lower():
-            opt = SolverFactory(self.solver.name.lower(), solver_io="python")
+        opt = SolverFactory(self.solver.name.lower())
+        if solver_params is not None:
+            result = opt.solve(self.model, tee=False, solver_options=solver_params)
         else:
-            opt = SolverFactory(self.solver.name.lower())
-        result = opt.solve(self.model, tee=False)
+            result = opt.solve(self.model, tee=False)
 
         self.status = str(result.solver.termination_condition)
-        if (result.solver.status == SolverStatus.ok) and (result.solver.termination_condition == TerminationCondition.optimal):
+        if result.solver.termination_condition == TerminationCondition.optimal:
             print("Solved.")
             self.solution = [value(self.model.x[i]) for i in self.model.I]
             self.objective_value = value(self.model.obj)
             if self.osense == 1:
                 self.objective_value = -self.objective_value
-        elif result.solver.termination_condition == TerminationCondition.infeasible:
+        else:
             self.solution = "Infeasible"
             self.objective_value = None
-
-
-def change_cobra_solver(name: str, params=None, print_level=1) -> SolverConfig:
-    name = name.upper()
-    known_solvers = ["GLPK", "CPLEX", "GUROBI", "HIGHS", "APPSI_HIGHS", "IPOPT"]
-    if name not in known_solvers:
-        raise ValueError(f"Unsupported solver: {name}")
-    return SolverConfig(name)
-
-
-def sparse_dict_to_dense(S_dict, shape=None):
-    row = S_dict["row"]
-    col = S_dict["col"]
-    data = S_dict["val"]
-    if shape is None:
-        n_row = int(pc.max(row).as_py()) + 1 if row else 0
-        n_col = int(pc.max(col).as_py()) + 1 if col else 0
-        shape = (n_row, n_col)
-    dense = np.zeros(shape)
-    for r, c, v in zip(row, col, data):
-        dense[r, c] = v
-    return dense
+            self.solution = None

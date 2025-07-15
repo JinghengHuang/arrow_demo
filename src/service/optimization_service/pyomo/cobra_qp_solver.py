@@ -18,16 +18,24 @@ class CobraQPSolver(BaseSolver):
         print("Solver start")
         # Send the data to model
         # Get results, using custom solver
-        # Use compatible version of highs when using highs
+        
         model_conf = self.model.get("solver")
-        if model_conf.get("solver_name").upper() == "HIGHS":
-            model_conf["solver_name"] = "appsi_highs"
+        
+        # Adapt to new solver names
+        if model_conf.get("solver_name").lower() == "gurobi_persistent" or model_conf.get("solver_name").lower() == "gurobi":
+            model_conf["solver_name"] = "gurobi_persistent_v2"
+        if model_conf.get("solver_name").lower() == "gurobi_direct":
+            model_conf["solver_name"] = "gurobi_direct_v2"
+        
+        solver_params = None
+        if "solver_params" in model_conf:
+            solver_params = model_conf["solver_params"]
         solver = change_cobra_solver(model_conf.get("solver_name") or "glpk")
         qp = QPProblem(self.model["A"], self.model["G"], self.model["Q"], self.model["b"], self.model["c"], self.model["h"], self.model["lb"], self.model["osense"], self.model["ub"])
         print("Building Model")
         # try:
         qp.build_qp(solver)
-        qp.solve()
+        qp.solve(solver_params)
         return {
             "solution": qp.solution,
             "status": qp.status,
