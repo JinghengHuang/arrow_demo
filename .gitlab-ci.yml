@@ -29,7 +29,7 @@ test:
     - curl -sSL https://install.python-poetry.org | python3 -
     - export PATH="$HOME/.local/bin:$PATH"
     - poetry config virtualenvs.create true
-    - poetry install --no-interaction --no-ansi
+    - poetry install --no-interaction --no-ansi --no-root
     # 激活 Poetry 创建的虚拟环境
     - source `poetry env info --path`/bin/activate  # ⟵ 关键：激活环境 :contentReference[oaicite:1]{index=1}
   script:
