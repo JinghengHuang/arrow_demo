@@ -26,8 +26,14 @@ test:
     POETRY_VERSION: "2.1.3"
   before_script:
     - apt-get update && apt-get install -y curl
-    - apt-get install glpk-utils libglpk-dev glpk-doc python-glpk
-    - apt-get install gcc g++ gfortran git patch wget pkg-config liblapack-dev libmetis-dev
+    # GLPK
+    - apt-get install -y \
+        build-essential gfortran wget unzip pkg-config liblapack-dev \
+        glpk-utils libglpk-dev
+    # 
+    - glpsol --version
+
+    - apt-get install -y gcc g++ gfortran git patch wget pkg-config liblapack-dev libmetis-dev
     # IPOPT
     - export IPOPT_BASE=/opt/ipopt
     - mkdir -p $IPOPT_BASE
