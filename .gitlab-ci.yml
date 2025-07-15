@@ -38,7 +38,7 @@ test:
     - cd /tmp
     - wget https://www.coin-or.org/download/source/Ipopt/Ipopt-${IPOPT_VERSION}.zip
     - unzip Ipopt-${IPOPT_VERSION}.zip
-    - cd Ipopt-${IPOPT_VERSION}
+    - cd Ipopt-releases-${IPOPT_VERSION}
     - cd ThirdParty/Blas && ./get.Blas && cd ../..
     - cd ThirdParty/Lapack && ./get.Lapack && cd ../..
     - cd ThirdParty/ASL && ./get.ASL && cd ../..
