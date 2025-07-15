@@ -17,40 +17,23 @@
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Getting-Started.gitlab-ci.yml
 
 stages:
-  - install
   - test
 
-variables:
-  POETRY_VERSION: "1.8.2"  # 你可以替换为你项目使用的版本
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-  POETRY_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pypoetry"
-  VENV_PATH: "$CI_PROJECT_DIR/.venv"
-
-cache:
-  paths:
-    - .cache/pip
-    - .cache/pypoetry
-    - .venv
-
-before_script:
-  - python --version
-  - curl -sSL https://install.python-poetry.org | python3 - --version $POETRY_VERSION
-  - export PATH="$HOME/.local/bin:$PATH"
-  - poetry config virtualenvs.in-project true
-  - poetry install
-
-install-dependencies:
-  stage: install
-  script:
-    - echo "Dependencies installed by poetry in install stage"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"'
-
 test:
+  image: python:3.12-slim  # 使用包含 Python 的官方镜像
   stage: test
-  script:
+  variables:
+    POETRY_VERSION: "2.1.3"
+  before_script:
+    - apt-get update && apt-get install -y curl
+    - curl -sSL https://install.python-poetry.org | python3 -
     - export PATH="$HOME/.local/bin:$PATH"
-    - poetry run pytest --junitxml=reports/junit.xml --cov=. --cov-report=xml --cov-report=html
+    - poetry config virtualenvs.create true
+    - poetry install --no-interaction --no-ansi
+    # 激活 Poetry 创建的虚拟环境
+    - source `poetry env info --path`/bin/activate  # ⟵ 关键：激活环境 :contentReference[oaicite:1]{index=1}
+  script:
+    - pytest --junitxml=reports/junit.xml --cov=. --cov-report=xml --cov-report=html
   artifacts:
     when: always
     paths:
@@ -59,5 +42,3 @@ test:
       - coverage.xml
     reports:
       junit: reports/junit.xml
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"'
