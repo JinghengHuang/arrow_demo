@@ -43,26 +43,7 @@ test:
     - apt-get install -y libglpk-dev glpk-utils
     - glpsol --version
 
-    - apt-get install -y \
-    - gfortran \
-    - gcc \
-    - g++ \
-    - make \
-    - wget \
-    - unzip \
-    - pkg-config \
-    - liblapack-dev \
-    - libblas-dev \
-    - libtool \
-    - coinor-libipopt-dev \
-    - build-essential \
-    - git \
-    - cmake \
-    - python3-dev \
-    - python3-pip \
-    - libopenblas-dev \
-    - libmumps-seq-dev \
-    - libmetis-dev
+    - apt-get install -y gfortran  gcc  g++  make  wget  unzip  pkg-config  liblapack-dev  libblas-dev  libtool  coinor-libipopt-dev  build-essential  git  cmake  python3-dev  python3-pip  libopenblas-dev  libmumps-seq-dev  libmetis-dev
     - wget https://ampl.com/dl/open/ipopt/ipopt-linux64.zip
     - unzip ipopt-linux64.zip
     - sudo mv ipopt-linux64 /opt/ipopt
@@ -85,7 +66,7 @@ test:
     - poetry install --no-interaction --no-ansi --no-root
     - source `poetry env info --path`/bin/activate
   script:
-    - sh startAll > /dev/null 2>&1 &
+    # - sh startAll > /dev/null 2>&1 &
     - poetry run pytest --junitxml=junit.xml --timeout=5
   artifacts:
     when: always
