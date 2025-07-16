@@ -1,9 +1,9 @@
 """
     Service factory class, build service object based on parameter
 """
-from src.service.base_service import BaseService
-from src.service.compute_grpc_service import GrpcComputeService
-from src.service.compute_julia_service import JuliaComputeService
+from service.base_service import BaseService
+from service.compute_grpc_service import GrpcComputeService
+from service.compute_julia_service import JuliaComputeService
 
 
 class ServiceFactory():

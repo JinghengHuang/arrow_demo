@@ -3,8 +3,8 @@ import json
 import pytest
 import requests
 import pyarrow as pa
-from src.utils.dict_to_pa_table import dict_to_pa_table
-import src.utils.network_check as ncheck
+from utils.dict_to_pa_table import dict_to_pa_table
+import utils.network_check as ncheck
 
 
 # read data from lp.json

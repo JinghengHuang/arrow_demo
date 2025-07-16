@@ -1,8 +1,8 @@
 """
 This module implements a solver for quadratic programming problems using the Cobra QP solver.
 """
-from src.service.optimization_service.pyomo.qp_problem import change_cobra_solver, QPProblem
-from src.service.optimization_service.pyomo.solver import BaseSolver
+from service.optimization_service.pyomo.qp_problem import change_cobra_solver, QPProblem
+from service.optimization_service.pyomo.solver import BaseSolver
 
 class CobraQPSolver(BaseSolver):
     """Solver for quadratic programming problems using Cobra QP solver."""

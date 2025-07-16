@@ -1,1 +1,1 @@
-PYTHONPATH=. python scripts/run_py_engine.py
+PYTHONPATH=. python src/run_py_engine.py

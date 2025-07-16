@@ -1,4 +1,4 @@
-from src.service.optimization_service.pyomo.cobra_qp_solver import CobraQPSolver
+from service.optimization_service.pyomo.cobra_qp_solver import CobraQPSolver
 
 # Use Server to test:
 

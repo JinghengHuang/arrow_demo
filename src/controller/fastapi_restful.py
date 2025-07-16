@@ -5,7 +5,7 @@ import pyarrow as pa
 from fastapi import Request
 from fastapi import FastAPI, status
 from fastapi.responses import Response
-from src.controller.endpoints import Endpoint
+from controller.endpoints import Endpoint
 
 app = FastAPI()
 endpoint = Endpoint()

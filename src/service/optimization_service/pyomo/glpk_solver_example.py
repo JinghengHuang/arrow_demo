@@ -1,6 +1,6 @@
 import pyomo.environ as pyo
 import pyarrow as pa
-from src.service.optimization_service.solver import BaseSolver
+from service.optimization_service.solver import BaseSolver
 
 # Example solver taken from pyomo tutorial implementing base solver
 class GlpkSolverSample(BaseSolver):

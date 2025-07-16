@@ -3,8 +3,8 @@ JuliaComputeService: A service for computing models using Julia via IPC
 """
 import socket
 import pyarrow as pa
-from src.service.base_service import BaseService
-from src.utils.dict_to_pa_table import dict_to_pa_table
+from service.base_service import BaseService
+from utils.dict_to_pa_table import dict_to_pa_table
 
 class JuliaComputeService(BaseService):
     """
