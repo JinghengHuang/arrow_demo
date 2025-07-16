@@ -119,6 +119,7 @@ def test_pyomo_qp_highs():
     result = solver.run(model)
     assert "Exception" not in str(result)
     assert "Error" not in str(result)
+    assert "error" not in str(result)
     print(result)
 
 # Glpk doesn't support qp, so no test for this
