@@ -59,11 +59,10 @@ test:
     - cd /builds/recon4imd/cobra_arrow
     - julia --project=./src/service/optimization_service/julia -e "import Pkg; Pkg.instantiate()"
     # Highs
-    - cd /tmp
-    - git clone https://github.com/ERGO-Code/HiGHS.git
-    - cd HiGHS
-    - cmake -S. -B build
-    - cmake --build build --parallel
+    - cd /opt
+    - wget https://github.com/JuliaBinaryWrappers/HiGHSstatic_jll.jl/releases/download/HiGHSstatic-v1.11.0%2B1/HiGHSstatic.v1.11.0.x86_64-linux-gnu-cxx11.tar.gz
+    - tar -zxf HiGHSstatic.v1.11.0.x86_64-linux-gnu-cxx11.tar.gz
+    - ln -s ./HiGHSstatic.v1.11.0.x86_64-linux-gnu-cxx11/bin /usr/local/bin/HiGHS
     - highs
 
     # Poetry
