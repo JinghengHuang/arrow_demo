@@ -1,7 +1,10 @@
+"""
+Run script to start the HTTP gateway server and engine servers together for debugging and testing.
+"""
+import multiprocessing
 from run_server import GatewayServer
 from run_julia_engine import JuliaEngineServer
 from run_py_engine import PyEngineServer
-import multiprocessing
 # Run script to start http gateway server and engine server together, for debugging and testing
 if __name__ == "__main__":
     server = GatewayServer()

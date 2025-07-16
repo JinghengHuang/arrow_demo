@@ -1,3 +1,8 @@
+"""
+# LPModel.jl
+# Linear Programming Model Representation using JuMP
+# This module provides functions to build and manipulate linear programming models using JuMP.
+"""
 module LPModel
 
 using SparseArrays
@@ -32,10 +37,37 @@ end
 
 
 
-
+"""
+    build_jump_model(data::Dict{Symbol,Any}) -> LPproblem
+Builds a JuMP model from the provided data dictionary.
+# Arguments
+- `data::Dict{Symbol,Any}`: A dictionary containing the model parameters.
+# Returns
+- `LPproblem`: An instance of `LPproblem` containing the model data.
+# Notes
+- The dictionary should contain the following keys:
+  - `:A`: Arrow Table with keys `:row`, `:col`, `:val` for the sparse matrix.
+  - `:b`: Right-hand side vector.
+  - `:c`: Objective coefficient vector.
+  - `:lb`: Lower bounds vector.
+  - `:ub`: Upper bounds vector.
+  - `:csense`: Constraint senses as an array of strings (e.g., "E", "G", "L").
+  - `:osense`: Objective sense as a string  (e.g., "max" or "min").
+# Example
+```julia
+data = Dict(
+    :A => Arrow.Table(row=[0, 1], col=[0, 1], val=[1.0, 2.0]),
+    :b => [3.0, 4.0],
+    :c => [1.0, 2.0],
+    :lb => [0.0, 0.0],
+    :ub => [10.0, 10.0],
+    :csense => ["E", "G"],
+    :osense => "max"
+)
+model = build_jump_model(data)
+```
+"""
 function build_jump_model(data)
-    # println("Data received: ", data)
-    # Convert the input sense to a vector of characters
     # Extract and convert the data
     A_data = data[:A]
     b = Vector{Float64}(data[:b])
@@ -58,10 +90,6 @@ function build_jump_model(data)
     csense = [sense_map[c] for c in csense_strs]
 
     A = sparse(row .+ 1, col .+ 1, val, nrow, ncol)
-
-    # c, A, sense, b, l, u, solver
-    # solver_name = solver_table[:solver_name]
-    # solver = changeSolver(solver_name)
 
     # Create the LPproblem object
     return buildlp(c * osense, A, csense, b, lb, ub)

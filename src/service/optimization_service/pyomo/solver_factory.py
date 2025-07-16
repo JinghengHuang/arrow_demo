@@ -1,6 +1,6 @@
-from service.optimization_service.solver import BaseSolver
-from service.optimization_service.pyomo.cobra_lp_solver import CobraLPSolver
-from service.optimization_service.pyomo.cobra_qp_solver import CobraQPSolver
+from src.service.optimization_service.pyomo.solver import BaseSolver
+from src.service.optimization_service.pyomo.cobra_lp_solver import CobraLPSolver
+from src.service.optimization_service.pyomo.cobra_qp_solver import CobraQPSolver
 
 class SolverFactory:
     def __init__(self):
@@ -9,7 +9,7 @@ class SolverFactory:
             "pyomo.qp": CobraQPSolver()
         }
         pass
-        
+
     def get_solver(self, name:str) -> BaseSolver:
         """Get a certain type of solver
 

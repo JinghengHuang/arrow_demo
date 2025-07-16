@@ -1,3 +1,9 @@
+"""
+# IOUtils.jl
+# Utility functions for reading and writing data in the optimization server
+# This module provides functions to read Arrow IPC data from a client and send results back.
+# It handles serialization and deserialization of optimization results in Arrow format.
+"""
 module IOUtils
 
 using Arrow
@@ -67,7 +73,7 @@ function send_success_result(client, status, objval, sol)
     df = DataFrame(
         success=true,
         status=string(status),
-        objective_value=objval,
+        obj_val=objval,
         solution=[sol],
     )
     buf = IOBuffer()

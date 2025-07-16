@@ -1,3 +1,8 @@
+"""
+# QPModel.jl
+# Quadratic Programming Model Representation using JuMP
+# This module provides functions to build and manipulate quadratic programming models using JuMP.
+"""
 module QPModel
 
 using SparseArrays
@@ -36,6 +41,36 @@ end
     build_jump_model(data)
 
 Build QP model from Arrow-compatible `data` dictionary.
+# Arguments
+- `data::Dict{Symbol,Any}`: A dictionary containing the model parameters.
+# Returns
+- `QPproblem`: An instance of `QPproblem` containing the model data.
+# Notes
+- The dictionary should contain the following keys:
+  - `:Q`: Arrow Table with keys `:row`, `:col`, `:val` for the sparse matrix.
+  - `:c`: Objective coefficient vector.
+  - `:A`: Arrow Table with keys `:row`, `:col`, `:val` for the equality constraints.
+  - `:b`: Right-hand side vector for equality constraints.
+  - `:G`: Arrow Table with keys `:row`, `:col`, `:val` for the inequality constraints (optional).
+  - `:h`: Right-hand side vector for inequality constraints (optional).
+  - `:lb`: Lower bounds vector.
+  - `:ub`: Upper bounds vector.
+  - `:osense`: Objective sense as a string ("max" or "min").
+# Example
+```julia
+data = Dict(
+    :Q => Arrow.Table(row=[0, 1], col=[0, 1], val=[1.0, 2.0]),
+    :c => [1.0, 2.0],
+    :A => Arrow.Table(row=[0, 1], col=[0, 1], val=[1.0, 2.0]),
+    :b => [3.0, 4.0],
+    :G => Arrow.Table(row=[0, 1], col=[0, 1], val=[1.0, 2.0]),
+    :h => [5.0, 6.0],
+    :lb => [0.0, 0.0],
+    :ub => [10.0, 10.0],
+    :osense => "max"
+)
+model = build_jump_model(data)
+```
 """
 function build_jump_model(data)
     # Extract fields

@@ -1,11 +1,11 @@
-
-import pyomo.environ as pyo
-import pyarrow as pa
-import numpy as np
-from service.optimization_service.pyomo.lp_problem import change_cobra_solver, LPProblem
-from service.optimization_service.solver import BaseSolver
+"""
+This module implements a solver for linear programming problems using the Cobra LP solver.
+"""
+from src.service.optimization_service.pyomo.lp_problem import change_cobra_solver, LPProblem
+from src.service.optimization_service.pyomo.solver import BaseSolver
 
 class CobraLPSolver(BaseSolver):
+    """Solver for linear programming problems using Cobra LP solver."""
     def __init__(self):
         self.model = {}
         super().__init__()
@@ -30,7 +30,7 @@ class CobraLPSolver(BaseSolver):
         if "solver_params" in model_conf:
             solver_params = model_conf["solver_params"]
         solver = change_cobra_solver(model_conf.get("solver_name") or "glpk")
-        lp = LPProblem(self.model["S"], self.model["b"], self.model["c"], self.model["lb"], self.model["ub"], self.model["osense"], self.model["csense"])
+        lp = LPProblem(self.model["A"], self.model["b"], self.model["c"], self.model["lb"], self.model["ub"], self.model["osense"], self.model["csense"])
         print("Building Model")
         try:
             lp.build_lp(solver)

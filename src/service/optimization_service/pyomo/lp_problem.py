@@ -4,7 +4,7 @@ from pyomo.opt import SolverStatus, TerminationCondition
 import pyarrow.compute as pc
 import os
 import gc
-from utils.pyomo_utils import *
+from src.utils.pyomo_utils import *
 
 class LPProblem:
     def __init__(self, S, b, c, lb, ub, osense, csense):
@@ -42,13 +42,13 @@ class LPProblem:
         model.x = Var(model.I, domain=Reals)
 
         # Bounds
-        for i in model.I:
+        for i in list(model.I):
             model.x[i].setlb(self.lb[i])
             model.x[i].setub(self.ub[i])
 
         print("Setting objectives:")
         # Objective
-        model.obj = Objective(expr=sum(self.c[i] * model.x[i] for i in model.I), sense=minimize if self.osense == -1 else maximize)
+        model.obj = Objective(expr=sum(self.c[i] * model.x[i] for i in list(model.I)), sense=minimize if self.osense == -1 else maximize)
 
         # S is now always dense 2D array
         # Setting constraints
