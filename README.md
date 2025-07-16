@@ -50,25 +50,25 @@ Please don't use pip or any other dependency management.
 ## To start all server instances (engine + gateway)
 
 ```bash
-sh startAll
+sh scripts/startAll
 ```
 
 ## To start gateway service instances
 
 ```bash
-sh startServer
+sh scripts/startServer
 ```
 
 ## To start python engine service instances
 
 ```bash
-sh startPyEngine
+sh scripts/startPyEngine
 ```
 
 ## To start julia engine service instances
 
 ```bash
-sh startJulia
+sh scripts/startJulia
 ```
 
 ## To run unit tests

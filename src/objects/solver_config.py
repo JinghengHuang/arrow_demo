@@ -1,13 +1,21 @@
-from .base_model import ArrowModel
-
 """
     class SolverConfig:
     This class is used to store the configuration for the solver.
     It includes the solver name, the solver type, and any additional parameters needed for the solver
 """
+from src.objects.base_model import ArrowModel
+
 
 class SolverConfig(ArrowModel):
-    def __init__(self, solver_name: str, solver_type: str, params: dict = None):
+    """
+    SolverConfig: Configuration for the optimization solver
+    This class provides a way to define the solver configuration, including the solver name,
+    solver type, and any additional parameters needed for the solver.
+    It inherits from ArrowModel to ensure compatibility with Arrow's in-memory format.
+    It provides methods to convert the configuration to a dictionary representation
+    and perform consistency checks.
+    """
+    def __init__(self, solver_dict: dict):
         """
         Initialize the SolverConfig with the solver name, type, and parameters.
         
@@ -15,6 +23,10 @@ class SolverConfig(ArrowModel):
         :param solver_type: Type of the solver (e.g., "LP", "MILP", etc.)
         :param params: Additional parameters for the solver, if any
         """
+        solver_name = solver_dict.get("solver_name")
+        solver_type = solver_dict.get("solver_type")
+        params = solver_dict.get("params", {})
+
         self.solver_name = solver_name
         if not solver_name:
             raise ValueError("Solver name cannot be empty.")
@@ -22,25 +34,6 @@ class SolverConfig(ArrowModel):
         if solver_type is None or solver_type.upper() not in ["LP", "QP"]:
             raise ValueError(f"Unsupported solver type: {solver_type}. Supported types are: LP, QP.")
         self.params = params if params is not None else {}
-        
+
     def sanity_check(self) -> None:
-        return super().sanity_check()
-    
-    @classmethod
-    def from_dict(cls, solver_dict: dict) -> "SolverConfig":
-        """
-        Create a SolverConfig instance from a dictionary representation.
-        
-        :param solver_dict: Dictionary containing solver configuration
-        :return: SolverConfig instance
-        """
-        print("type of solver_dict: ", type(solver_dict))
-        print("solver_dict: ", solver_dict)
-        
-        solver_name = solver_dict.get("solver_name")
-        solver_type = solver_dict.get("solver_type")
-        params = solver_dict.get("params", {})
-        
-        return cls(solver_name=solver_name, solver_type=solver_type, params=params)
-        
-    
+        pass

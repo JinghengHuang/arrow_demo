@@ -1,6 +1,8 @@
+"""
+Utility functions to convert dictionary data to PyArrow Table format and unpack it.
+"""
 import pyarrow as pa
-    
-    
+
 def dict_to_pa_table(data:dict) -> pa.Table:
     """A util function to convert any dictionary data to pyArrow Table data, each column with a length of 1 which contains the data.
 
@@ -27,6 +29,12 @@ def dict_to_pa_table(data:dict) -> pa.Table:
     return result
 
 def unpack_pa_table_dict(data:pa.Table) -> dict:
+    """Unpack a PyArrow Table data to a dictionary with each column containing a single value.
+    Args:
+        data (pa.Table): PyArrow Table data to be unpacked
+    Returns:
+        dict: Dictionary with each key corresponding to a column name and value being the first element of that column.
+    """
     # get data from memory
     input_params:dict = pa.Table.to_pydict(data)
     # Unpack data

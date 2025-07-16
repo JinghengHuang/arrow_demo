@@ -1,6 +1,9 @@
+"""
+Utility functions to check if a network port is open.
+"""
 import socket
 from contextlib import closing
-   
+
 def check_socket(host, port):
     """Check if a port is open.
 

@@ -1,66 +1,45 @@
-from typing import Union, Annotated
+"""
+Endpoints for the optimization service API
+"""
 import pyarrow as pa
-import pyarrow.ipc as ipc
 from fastapi import Request
-import io
-from fastapi import FastAPI, File, Form, UploadFile
-from fastapi.responses import StreamingResponse
+from fastapi import FastAPI, status
 from fastapi.responses import Response
-from controller.endpoints import *
+from src.controller.endpoints import Endpoint
 
 app = FastAPI()
 endpoint = Endpoint()
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
-
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
-
 @app.post("/compute")
 async def compute(request: Request):
-    raw = await request.body()
-    reader = pa.ipc.open_stream(raw)
-    table = reader.read_all()
-    success, result = endpoint.compute(payload=table)
-    if success:
-        sink = pa.BufferOutputStream()
-        with pa.ipc.new_stream(sink, result.schema) as writer:
-            writer.write(result)
-        ipc_bytes = sink.getvalue().to_pybytes()
-        return Response(
-            content = ipc_bytes,
-            status_code = 200,
-            media_type= "application/vnd.apache.arrow.stream"
-        )
-    else:
+    """
+    Execute computation using a model and data, either from ID or inline.
+    :param request: Request object containing the payload
+    :return: Response with result metadata and output
+    """
+    try:
+        raw = await request.body()
+        reader = pa.ipc.open_stream(raw)
+        table = reader.read_all()
+        success, result = endpoint.compute(payload=table)
+        if success:
+            sink = pa.BufferOutputStream()
+            with pa.ipc.new_stream(sink, result.schema) as writer:
+                writer.write(result)
+            ipc_bytes = sink.getvalue().to_pybytes()
+            return Response(
+                content = ipc_bytes,
+                status_code = status.HTTP_200_OK,
+                media_type= "application/vnd.apache.arrow.stream"
+            )
         return Response(
             content = result.column("error_message")[0].as_py(),
-            status_code = result.column("error_code")[0].as_py(),
+            status_code = status.HTTP_400_BAD_REQUEST,
             media_type= "application/vnd.apache.arrow.stream"
         )
-
-@app.post("/saveModel")
-async def save(model_id: Annotated[Optional[str], Form()] = None, 
-            model_name: Annotated[Optional[str], Form()] = None, 
-            model: Annotated[UploadFile, File(), None] = None):
-    """
-        Save a model to the server.
-        :param model_id: Optional model ID
-        :param model_name: Name of the model, if not provided can use ID extracted from the model file
-        :param model: The model file to save, expected to be in .mat format
-        :return: A message indicating success or failure
-    """
-    contents = await model.read()
-    mat_dict = endpoint.parse_model(contents)
-    mat_model = mat_dict['engine_model']
-    ipc_dict = mat_model.to_ipc_bytes()
-    # handle model saving logic
-    endpoint.save_model(payload={
-        "model_id": model_id,
-        "model_name": model_name,
-        "model": contents
-    })
-    return {"message": f"Saving model {model_name} successful, file size: {len(contents)}"}
+    except (ValueError, KeyError) as e:
+        return Response(
+            content = f"{type(e).__name__}: {str(e)}",
+            status_code = status.HTTP_400_BAD_REQUEST,
+            media_type= "application/vnd.apache.arrow.stream"
+        )

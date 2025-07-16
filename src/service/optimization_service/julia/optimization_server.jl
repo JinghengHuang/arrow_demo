@@ -1,3 +1,10 @@
+"""
+# OptimizationServer.jl
+# This module implements a TCP server for handling optimization requests using JuMP and COBRA.jl
+# It supports both Linear Programming (LP) and Quadratic Programming (QP) models.
+# The server reads Arrow IPC data from clients, builds the corresponding JuMP model,
+# runs the optimization, and sends results back in Arrow format.
+"""
 module OptimizationServer
 
 # === Core Packages ===
@@ -135,6 +142,7 @@ function get_optimizer(data)
     return optimizer
 end
 
+
 """
 solve(model::Model, x) -> NamedTuple
 
@@ -159,7 +167,6 @@ function solve(model, x)
         sol=value.(x)
     )
 end
-
 
 
 end  # module

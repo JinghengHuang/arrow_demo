@@ -1,17 +1,31 @@
-import pathlib
-import pyarrow as pa
-import pyarrow.flight
-from service.optimization_service.solver_factory import SolverFactory
+"""
+This module implements an Arrow RPC server for handling optimization service requests.
+"""
 import logging
 import sys
-from utils.dict_to_pa_table import dict_to_pa_table, unpack_pa_table_dict
-from concurrent.futures import ThreadPoolExecutor
+import pathlib
 import threading
+from concurrent.futures import ThreadPoolExecutor
+import pyarrow as pa
+import pyarrow.flight
+from src.service.optimization_service.pyomo.solver_factory import SolverFactory
+from src.utils.dict_to_pa_table import dict_to_pa_table
+from src.utils.dict_to_pa_table import unpack_pa_table_dict
 
 solver_factory = SolverFactory()
 logger = logging.getLogger(__name__)
 
 class FlightServer(pyarrow.flight.FlightServerBase):
+    """
+    FlightServer: A gRPC server for handling optimization service requests
+    This server uses PyArrow's Flight RPC framework to handle requests for optimization models.
+    It provides endpoints for listing available datasets, uploading new datasets,
+    retrieving datasets, and executing solvers on the uploaded data.
+    It uses a thread pool executor to handle solver execution asynchronously.
+    It supports both uploading and retrieving datasets, as well as executing solvers on the datasets.
+    It uses a dictionary to store datasets in memory, allowing for quick access and manipulation.
+    It provides methods to handle dataset management and solver execution.
+    """
 
     def __init__(self, location="grpc://0.0.0.0:8815",
                 repo=pathlib.Path("./datasets"), **kwargs):
@@ -78,6 +92,8 @@ class FlightServer(pyarrow.flight.FlightServerBase):
             else:
                 return pa.flight.RecordBatchStream(self._tables[ticket_str])
 
+
+
     def list_actions(self, context):
         return [
             ("drop_dataset", "Delete a dataset."),
@@ -93,6 +109,7 @@ class FlightServer(pyarrow.flight.FlightServerBase):
     def do_drop_dataset(self, dataset):
         with self._lock:
             self._tables[dataset] = None
+
     # Execute a solver
     def do_solver(self, param:str):
         params = param.split(',')
@@ -104,10 +121,15 @@ class FlightServer(pyarrow.flight.FlightServerBase):
         solver = solver_factory.get_solver(solver_name)
         # run solver and get result in form of pa table
         logger.info("Computing model:")
-        result = solver.run(input_params)
-        logger.info(result)
-        result_table = dict_to_pa_table(result)
+        try:
+            result = solver.run(input_params)
+            logger.info(result)
+            result_table = dict_to_pa_table(result).append_column("success", pa.array([True]))
+        except Exception as e:
+            logger.error(f"Solver execution failed: {e}")
+            result_table = pa.Table.from_pydict({"success" : [False],"error_message": [str(e)]})
         return pa.flight.RecordBatchStream(result_table)
+
 
 def grpc_serve_addr(ipaddr:str, port:int, ext_logger) -> None:
     logger = ext_logger
@@ -118,6 +140,7 @@ def grpc_serve_addr(ipaddr:str, port:int, ext_logger) -> None:
     server._repo.mkdir(exist_ok=True)
     logger.info("Server running at " + server._location)
     server.serve()
+
 # Use when run standalone
 def grpc_serve() -> None:
     server = FlightServer()
