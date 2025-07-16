@@ -31,7 +31,7 @@ test:
     - apt-get install -y libglpk-dev glpk-utils
     - glpsol --version
 
-    - apt-get install -y gcc g++ gfortran git patch wget pkg-config liblapack-dev libmetis-dev unzip
+    - apt-get install -y gcc g++ gfortran git patch wget pkg-config liblapack-dev libmetis-dev unzip make build-essential
     # IPOPT
     - export IPOPT_BASE=/opt/ipopt
     - mkdir -p $IPOPT_BASE
