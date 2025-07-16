@@ -1,16 +1,17 @@
-# import sys
-# import os
-# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../src")))
-import utils.network_check as ncheck
-import requests,time
+
+import time
+import json
+import pytest
 import pyarrow as pa
-from utils.dict_to_pa_table import dict_to_pa_table
+import requests
+from src.utils.dict_to_pa_table import dict_to_pa_table
+import src.utils.network_check as ncheck
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import random
-import json, pytest
 
-with open("tests/ipc_http_test/qp.json", "r") as f:
+
+with open("tests/ipc_http_test/qp.json", "r", encoding='utf-8') as f:
     data = json.load(f)
     model_data = data["model_data"]  # turn model_data json into a dictionary
     solvers = data["solvers"]
@@ -18,12 +19,10 @@ with open("tests/ipc_http_test/qp.json", "r") as f:
 
 @pytest.mark.parametrize("solver", solvers)
 def test_julia_flow(solver):
-    
-    
     if ncheck.check_socket("127.0.0.1", 8000) is False:
         pytest.skip("Server is not started")
     url = "http://127.0.0.1:8000/compute"
-    
+
     ipc_dict = {
         "model" :model_data,
         "model_name": "test_qp",
@@ -31,13 +30,12 @@ def test_julia_flow(solver):
         "solver": solver
     }
     ipc_table = dict_to_pa_table(ipc_dict)
-    
+
     # convert to ipc stream
     sink = pa.BufferOutputStream()
     with pa.ipc.new_stream(sink, ipc_table.schema) as writer:
         writer.write(ipc_table)
-        
-    
+
     # converts to bytes
     ipc_bytes = sink.getvalue().to_pybytes()
 
@@ -54,11 +52,11 @@ def test_julia_flow(solver):
     print(response.status_code)
     print(response.content)
     
-    # post = time.time()
-    # diff = post - pre
-    # print(f"Pre request: {pre}")
-    # print(f"Post request: {post}")
-    # print(f"Time diff: {diff}")
+    post = time.time()
+    diff = post - pre
+    print(f"Pre request: {pre}")
+    print(f"Post request: {post}")
+    print(f"Time diff: {diff}")
 
 # test_julia_flow()
 

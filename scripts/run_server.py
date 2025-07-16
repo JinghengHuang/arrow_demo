@@ -1,11 +1,17 @@
+"""
+Run the FastAPI server for the HTTP gateway
+"""
 import multiprocessing
-from service.optimization_service.arrow_rpc_server import grpc_serve_addr
+import sys
 import logging
-import sys, os
+import uvicorn
 import yaml
 # Run all servers in multiprocessing
 
-class PyEngineServer():
+class GatewayServer():
+    """
+    Class to run the FastAPI server for the HTTP gateway
+    """
     def __init__(self):
         self.port = 8000
         self.grpc_port = 8100
@@ -15,9 +21,9 @@ class PyEngineServer():
     def config_loader(self):
         """
         Load config from config.yaml
-        will load ip and port config for Pyomo
+        will load ip and port config for HTTP Server
         """
-        with open('config.yaml', 'r') as file:
+        with open('config.yaml', 'r', encoding='utf-8') as file:
             nested_data = yaml.safe_load(file)
             if nested_data["http"] is not None:
                 self.port = int(nested_data["http"]["port"])
@@ -44,25 +50,27 @@ class PyEngineServer():
         if not self.logger.hasHandlers():
             self.logger.addHandler(handler)
         return self.logger
-    
-    
-    def run_grpc_server(self):
-        """Start pyomo service
-        """
-        logger = self.setup_custom_logger(f"worker_grpc")
-        logger.info("Starting worker on gRPC server")
-        grpc_serve_addr(self.ipaddr_rpc, self.grpc_port, logger)
-        
-    # TODO Add other service starting points here
-    def start_engine_services(self) -> None:
-        """Start pyomo service in a subprocess
-        """
-        grpc_thread = multiprocessing.Process(target=self.run_grpc_server, daemon=True)
-        grpc_thread.start()
-        grpc_thread.join()
 
-# Run script to start engine service
+    def run_server(self):
+        """Start FastAPI server via uvicorn
+        """
+        self.logger = self.setup_custom_logger(f"worker_fastAPI")
+        self.logger.info("Starting worker on FastAPI")
+        uvicorn.run("src.controller.fastapi_restful:app",
+                    host=self.ipaddr_http,
+                    port=self.port,
+                    log_level="info",
+                    access_log=True)
+
+    def run_server_multiprocessing(self):
+        """Start FastAPI server in a subprocess
+        """
+        server_thread = multiprocessing.Process(target=self.run_server, daemon=False)
+        server_thread.start()
+        server_thread.join()
+
+# Run script to start http gateway server
 if __name__ == "__main__":
-    server = PyEngineServer()
+    server = GatewayServer()
     server.config_loader()
-    server.start_engine_services()
+    server.run_server()

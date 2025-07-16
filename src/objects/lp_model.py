@@ -1,44 +1,39 @@
-import pyarrow as pa
-import pyarrow.compute as pc
-from .base_model import ArrowModel
-from utils.model_sanity_check import check_arrow_coo_matrix, check_variable_bounds, check_objective_sense
-
 """
 LPModel: Linear Programming Model Representation using PyArrow
-
-This class provides a structured way to represent a standard linear programming (LP) model
-using Arrow's in-memory format for high-performance serialization and communication.
-
-Standard LP form:
-    minimize     c^T x
-    subject to   A x = b
-                 lb <= x <= ub
-
-Model Components:
-    - A:       Constraint matrix in sparse COO format (as a RecordBatch with columns "row", "col", "val")
-    - b:       Right-hand side vector
-    - c:       Objective function coefficients
-    - lb:      Lower bound for each variable(Optional)
-    - ub:      Upper bound for each variable(Optional)
-    - osense:  Objective sense, e.g., "min" or "max" (Optional, defaults to "min")
-    - csense:  Constraint senses, e.g., ["E", "L", "G"] for equality, ≤, ≥ (Optional, defaults to all "E")
 """
+import pyarrow as pa
+from src.objects.base_model import ArrowModel
+from src.utils.model_sanity_check import check_arrow_coo_matrix, check_variable_bounds, check_objective_sense
+
+
 
 class LPModel(ArrowModel):
-    def __init__(
-        self,
-        A: pa.RecordBatch,
-        b: pa.Array,
-        c: pa.Array,
-        lb: pa.Array = None,
-        ub: pa.Array = None,
-        osense: pa.Scalar = None,
-        csense: pa.Array = None
-    ):
-        """
-    Initialize an LP model.
+    """
+    LPModel: Linear Programming Model Representation using PyArrow
 
-    Required:
+    This class provides a structured way to represent a standard linear programming (LP) model
+    using Arrow's in-memory format for high-performance serialization and communication.
+
+    Standard LP form:
+        minimize     c^T x
+        subject to   A x = b
+                    lb <= x <= ub
+
+    Model Components:
+        - A:       Constraint matrix in sparse COO format (as a RecordBatch with columns "row", "col", "val")
+        - b:       Right-hand side vector
+        - c:       Objective function coefficients
+        - lb:      Lower bound for each variable(Optional)
+        - ub:      Upper bound for each variable(Optional)
+        - osense:  Objective sense, e.g., "min" or "max" (Optional, defaults to "min")
+        - csense:  Constraint senses, e.g., ["E", "L", "G"] for equality, ≤, ≥ (Optional, defaults to all "E")
+    """
+
+    def __init__(self, model_dict: dict):
+        """
+        Initialize an LP model.
+
+        Required:
             - A (RecordBatch): Sparse constraint matrix in COO format with "row", "col", "val"
             - b (Array): Right-hand side vector
             - c (Array): Objective function coefficients
@@ -49,9 +44,17 @@ class LPModel(ArrowModel):
             - osense (Scalar): "min" or "max" (default: "min")
             - csense (Array): ["E", "L", "G"] (default: all "E")
 
-    Raises:
-        TypeError / ValueError if inputs are malformed
-    """
+        Raises:
+            TypeError / ValueError if inputs are malformed
+        """
+        A = pa.RecordBatch.from_pydict(model_dict["A"])
+        b = pa.array(model_dict["b"])
+        c = pa.array(model_dict["c"])
+        lb = pa.array(model_dict.get("lb", []))
+        ub = pa.array(model_dict.get("ub", []))
+        osense = pa.scalar(model_dict.get("osense", "min"), type=pa.string())
+        csense = pa.array(model_dict.get("csense", ["E"] * len(b)), type=pa.string())
+        
         if not isinstance(A, pa.RecordBatch):
             raise TypeError("A must be RecordBatch")
         if not all(name in A.schema.names for name in ["row", "col", "val"]):
@@ -64,9 +67,8 @@ class LPModel(ArrowModel):
         self.ub = ub    # Upper bounds for decision variables
         self.osense = osense if osense is not None else pa.scalar("min", type=pa.string())
         self.csense = csense if csense is not None else pa.array(["E"] * len(b), type=pa.string())
-              
-              
-              
+
+
     def sanity_check(self):
         """
         Perform consistency checks on LP model dimensions and indices.

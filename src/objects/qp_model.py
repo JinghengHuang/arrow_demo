@@ -1,7 +1,11 @@
+"""
+QPModel: Quadratic Programming Model Representation using PyArrow
+"""
+
 import pyarrow as pa
-import pyarrow.compute as pc
-from .base_model import ArrowModel
-from ..utils.model_sanity_check import check_arrow_coo_matrix, check_variable_bounds
+from src.objects.base_model import ArrowModel
+from src.utils.model_sanity_check import check_arrow_coo_matrix, check_variable_bounds, check_objective_sense
+
 
 class QPModel(ArrowModel):
     """
@@ -25,30 +29,32 @@ class QPModel(ArrowModel):
     and IPC serialization.
     """
 
-    def __init__(
-        self,
-        Q: pa.RecordBatch,    # Quadratic term (COO)
-        c: pa.Array,          # Linear term
-        A: pa.RecordBatch,    # Equality constraints (COO)
-        b: pa.Array,          # Equality RHS
-        G: pa.RecordBatch = None,  # Inequality constraints (COO)
-        h: pa.Array = None,        # Inequality RHS
-        lb: pa.Array = None,       # Lower bounds
-        ub: pa.Array = None,       # Upper bounds
-        osense: pa.Scalar = None   # Objective sense (e.g., "min" or "max", default to "min" if None)
-    ):
+    def __init__(self, model_dict: dict):
         """
         Initialize QP model.
 
         Required:
-            - Q, A: RecordBatch with "row", "col", "val"
-            - c, b: Arrow arrays (must match dimensions)
-        
+            - Q (RecordBatch): Sparse quadratic coefficient matrix in COO format with "row", "col", "val"
+            - c (Array): Linear coefficients
+            - A (RecordBatch): Sparse equality constraint matrix in COO format with "row", "col", "val"
+            - b (Array): Right-hand side vector for equality constraints
         Optional:
-            - G, h: Inequality constraints
-            - lb, ub: Bounds
-            - osense: "min" or "max" (default: "min")
+            - G (RecordBatch): Sparse inequality constraint matrix in COO format with "row", "col", "val"
+            - h (Array): Right-hand side vector for inequality constraints
+            - lb (Array): Lower bounds for variables (default: None, treated as unbounded)
+            - ub (Array): Upper bounds for variables (default: None, treated as unbounded)
+            - osense (Scalar): "min" or "max" (default: "min
         """
+        Q = pa.RecordBatch.from_pydict(model_dict.get("Q"))
+        c = model_dict.get("c")
+        A = pa.RecordBatch.from_pydict(model_dict.get("A"))
+        b = model_dict.get("b")
+        G = pa.RecordBatch.from_pydict(model_dict.get("G", None))
+        h = model_dict.get("h", None)
+        lb = model_dict.get("lb", None)
+        ub = model_dict.get("ub", None)
+        osense = pa.scalar(model_dict.get("osense", "min"), type=pa.string())
+        
         for name, mat in [("Q", Q), ("A", A)] + ([("G", G)] if G is not None else []):
             if not isinstance(mat, pa.RecordBatch):
                 raise TypeError(f"{name} must be a pyarrow.RecordBatch")
@@ -64,8 +70,8 @@ class QPModel(ArrowModel):
         self.lb = lb
         self.ub = ub
         self.osense = osense if osense is not None else pa.scalar("min", type=pa.string())
-        
-        
+
+
     def sanity_check(self):
         """
         Sanity checks for QP model consistency.

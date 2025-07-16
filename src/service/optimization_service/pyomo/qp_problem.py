@@ -6,7 +6,7 @@ from gethighs import HiGHS
 import os
 import gc
 import time
-from utils.pyomo_utils import *
+from src.utils.pyomo_utils import *
 
 class QPProblem:
     def __init__(self, A, G, Q, b, c, h, lb, osense, ub):

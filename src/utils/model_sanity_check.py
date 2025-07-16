@@ -1,3 +1,6 @@
+"""
+Utility functions to validate sparse matrix formats and variable bounds in PyArrow RecordBatches.
+"""
 import pyarrow.compute as pc
 import pyarrow as pa
 
@@ -50,9 +53,9 @@ def check_variable_bounds(lb: pa.Array, ub: pa.Array, n_vars: int):
         raise ValueError(f"Length of lb ({len(lb)}) != number of variables ({n_vars})")
     if ub is not None and len(ub) != n_vars:
         raise ValueError(f"Length of ub ({len(ub)}) != number of variables ({n_vars})")
-    
-    
-    
+
+
+
 def check_objective_sense(osense: pa.Scalar):
     """
     Check if objective sense is valid ('min' or 'max').

@@ -1,10 +1,5 @@
+from src.service.optimization_service.pyomo.cobra_qp_solver import CobraQPSolver
 
-import pyarrow as pa
-import pyarrow.ipc as ipc
-import requests
-import time
-from service.optimization_service.pyomo.cobra_qp_solver import CobraQPSolver
-from utils.dict_to_pa_table import dict_to_pa_table
 # Use Server to test:
 
 # Quadratic term Q as native Python dict
