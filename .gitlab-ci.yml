@@ -50,11 +50,10 @@ test:
     - export LD_LIBRARY_PATH="$IPOPT_BASE/lib:$LD_LIBRARY_PATH"
     - export PATH="$IPOPT_BASE/bin:$PATH"
     # Poetry
+    - cd /builds/recon4imd/cobra_arrow
     - curl -sSL https://install.python-poetry.org | python3 -
     - export PATH="$HOME/.local/bin:$PATH"
     - poetry config virtualenvs.create true
-    - cd ~
-    - ls
     - poetry install --no-interaction --no-ansi --no-root
     - source `poetry env info --path`/bin/activate
   script:
