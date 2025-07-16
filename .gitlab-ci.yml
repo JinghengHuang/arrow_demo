@@ -26,6 +26,8 @@ test:
     POETRY_VERSION: "2.1.3"
     IPOPT_VERSION: "3.14.0"
   before_script:
+    - ls
+    - pwd
     - apt-get update && apt-get install -y curl
     # GLPK
     - apt-get install -y libglpk-dev glpk-utils
