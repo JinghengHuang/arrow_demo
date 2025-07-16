@@ -57,12 +57,6 @@ git-tree-sha1 = "389ad5c84de1ae7cf0e28e381131c98ea87d54fc"
 uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 version = "0.5.0"
 
-[[deps.CPLEX]]
-deps = ["CEnum", "Libdl", "MathOptInterface", "SparseArrays"]
-git-tree-sha1 = "36590867625f14e47196678cd2028b0956e2101d"
-uuid = "a076750e-1247-5638-91d2-ce28b192dca0"
-version = "1.1.1"
-
 [[deps.CSDP]]
 deps = ["CSDP_jll", "LinearAlgebra", "MathOptInterface", "SparseArrays"]
 git-tree-sha1 = "8fbe74ea25d841085e073a5505d32d90058a7221"

@@ -1,6 +1,5 @@
 [deps]
 Arrow = "69666777-d1a9-59fb-9406-91d4454c9d45"
-CPLEX = "a076750e-1247-5638-91d2-ce28b192dca0"
 CSDP = "0a46da34-8e4b-519e-b418-48813639ff34"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 GLPK = "60bf3e95-4087-53dc-ae20-288a0d20c6a6"
