@@ -4,7 +4,7 @@ from pyomo.opt import SolverStatus, TerminationCondition
 import pyarrow.compute as pc
 import os
 import gc
-from src.utils.pyomo_utils import *
+from utils.pyomo_utils import *
 
 class LPProblem:
     def __init__(self, S, b, c, lb, ub, osense, csense):

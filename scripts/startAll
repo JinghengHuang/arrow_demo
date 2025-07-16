@@ -1,1 +1,1 @@
-PYTHONPATH=. python scripts/run_all.py
+PYTHONPATH=. python src/run_all.py

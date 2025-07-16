@@ -1,1 +1,1 @@
-python scripts/run_julia_engine.py
+python src/run_julia_engine.py

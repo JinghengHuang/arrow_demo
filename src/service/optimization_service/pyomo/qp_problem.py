@@ -5,7 +5,8 @@ import pyarrow.compute as pc
 from gethighs import HiGHS
 import os
 import gc
-from src.utils.pyomo_utils import *
+import time
+from utils.pyomo_utils import *
 
 class QPProblem:
     def __init__(self, A, G, Q, b, c, h, lb, osense, ub):
@@ -90,9 +91,16 @@ class QPProblem:
         if self.model is None or self.solver is None:
             raise RuntimeError("Model not built or solver not assigned.")
         sol_path = "./sol.sol"
+        sleep_time = 1
+        timeout_count = 5
         if "highs" in self.solver.name.lower(): 
             opt = HiGHS(solution_file=sol_path, **solver_params)
             result = opt.solve(self.model)
+            while not os.path.exists(sol_path):
+                time.sleep(sleep_time)
+                timeout_count -= 1
+                if timeout_count < 0:
+                    raise RuntimeError("HiGHS timeout, check if HiGHS are installed.")
         else:
             opt = SolverFactory(self.solver.name.lower())
             if solver_params is not None:

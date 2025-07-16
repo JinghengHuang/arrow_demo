@@ -3,10 +3,10 @@ Endpoints for the optimization service API
 """
 from typing import Dict
 import pyarrow as pa
-from src.objects.lp_model import LPModel
-from src.objects.qp_model import QPModel
-from src.objects.solver_config import SolverConfig
-from src.service.service_factory import ServiceFactory
+from objects.lp_model import LPModel
+from objects.qp_model import QPModel
+from objects.solver_config import SolverConfig
+from service.service_factory import ServiceFactory
 
 
 class Endpoint:

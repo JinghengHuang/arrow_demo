@@ -1,6 +1,6 @@
-from src.service.optimization_service.pyomo.solver import BaseSolver
-from src.service.optimization_service.pyomo.cobra_lp_solver import CobraLPSolver
-from src.service.optimization_service.pyomo.cobra_qp_solver import CobraQPSolver
+from service.optimization_service.pyomo.solver import BaseSolver
+from service.optimization_service.pyomo.cobra_lp_solver import CobraLPSolver
+from service.optimization_service.pyomo.cobra_qp_solver import CobraQPSolver
 
 class SolverFactory:
     def __init__(self):

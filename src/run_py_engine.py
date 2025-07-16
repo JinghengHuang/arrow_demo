@@ -5,7 +5,7 @@ import multiprocessing
 import logging
 import sys
 import yaml
-from src.service.optimization_service.pyomo.arrow_rpc_server import grpc_serve_addr
+from service.optimization_service.pyomo.arrow_rpc_server import grpc_serve_addr
 
 # Run all servers in multiprocessing
 

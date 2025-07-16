@@ -1,8 +1,8 @@
 """
 This module implements a solver for quadratic programming problems using the Cobra QP solver.
 """
-from src.service.optimization_service.pyomo.qp_problem import change_cobra_solver, QPProblem
-from src.service.optimization_service.pyomo.solver import BaseSolver
+from service.optimization_service.pyomo.qp_problem import change_cobra_solver, QPProblem
+from service.optimization_service.pyomo.solver import BaseSolver
 
 class CobraQPSolver(BaseSolver):
     """Solver for quadratic programming problems using Cobra QP solver."""
@@ -32,15 +32,17 @@ class CobraQPSolver(BaseSolver):
         solver = change_cobra_solver(model_conf.get("solver_name") or "glpk")
         qp = QPProblem(self.model["A"], self.model["G"], self.model["Q"], self.model["b"], self.model["c"], self.model["h"], self.model["lb"], self.model["osense"], self.model["ub"])
         print("Building Model")
-        # try:
-        qp.build_qp(solver)
-        qp.solve(solver_params)
-        return {
-            "solution": qp.solution,
-            "status": qp.status,
-            "obj_val": qp.objective_value
-        }
-        # except Exception as e:
-        #     return {
-        #         "Exception:": str(e)
-        #     }
+        try:
+            qp.build_qp(solver)
+            qp.solve(solver_params)
+            return {
+                "success": True,
+                "solution": qp.solution,
+                "status": qp.status,
+                "obj_val": qp.objective_value
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error_message:": str(e)
+            }

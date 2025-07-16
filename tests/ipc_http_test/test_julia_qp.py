@@ -4,8 +4,8 @@ import json
 import pytest
 import pyarrow as pa
 import requests
-from src.utils.dict_to_pa_table import dict_to_pa_table
-import src.utils.network_check as ncheck
+from utils.dict_to_pa_table import dict_to_pa_table
+import utils.network_check as ncheck
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import random

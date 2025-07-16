@@ -1,8 +1,8 @@
 """
 This module implements a solver for linear programming problems using the Cobra LP solver.
 """
-from src.service.optimization_service.pyomo.lp_problem import change_cobra_solver, LPProblem
-from src.service.optimization_service.pyomo.solver import BaseSolver
+from service.optimization_service.pyomo.lp_problem import change_cobra_solver, LPProblem
+from service.optimization_service.pyomo.solver import BaseSolver
 
 class CobraLPSolver(BaseSolver):
     """Solver for linear programming problems using Cobra LP solver."""
@@ -36,11 +36,13 @@ class CobraLPSolver(BaseSolver):
             lp.build_lp(solver)
             lp.solve(solver_params)
             return {
+                "success": True,
                 "solution": lp.solution,
                 "status": lp.status,
                 "obj_val": lp.objective_value
             }
         except Exception as e:
             return {
-                "Exception:": str(e)
+                "success": False,
+                "error_message:": str(e)
             }
