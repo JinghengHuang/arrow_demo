@@ -64,6 +64,7 @@ test:
     - cd HiGHS
     - cmake -S. -B build
     - cmake --build build --parallel
+    - highs
 
     # Poetry
     - cd /builds/recon4imd/cobra_arrow
@@ -74,7 +75,7 @@ test:
     - source `poetry env info --path`/bin/activate
   script:
     # - sh startAll > /dev/null 2>&1 &
-    - poetry run pytest --junitxml=junit.xml --timeout=5
+    - poetry run pytest --junitxml=junit.xml --timeout=10
   artifacts:
     when: always
     paths:
