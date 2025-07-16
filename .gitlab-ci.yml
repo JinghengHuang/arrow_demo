@@ -63,6 +63,7 @@ test:
     - mkdir highs && cd highs
     - wget https://github.com/JuliaBinaryWrappers/HiGHSstatic_jll.jl/releases/download/HiGHSstatic-v1.11.0%2B1/HiGHSstatic.v1.11.0.x86_64-linux-gnu-cxx11.tar.gz
     - tar -zxf HiGHSstatic.v1.11.0.x86_64-linux-gnu-cxx11.tar.gz
+    - ls
     - ln -s ./bin/highs /usr/local/bin/highs
     - highs
 
