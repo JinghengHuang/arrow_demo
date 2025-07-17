@@ -54,7 +54,8 @@ test:
     - make && make install
     - cd /opt/ipopt/Ipopt/ThirdParty
     - git clone https://github.com/coin-or-tools/ThirdParty-ASL.git
-    - cd ThirdParty-ASL && ./configure
+    - cd ThirdParty-ASL && ./get.ASL
+    - ./configure
     - make && make install
     - cd /opt/ipopt/Ipopt
     - mkdir build && cd build
