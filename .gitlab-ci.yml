@@ -49,7 +49,8 @@ test:
     - cd Ipopt
     - mkdir ThirdParty && cd ThirdParty
     - git clone https://github.com/coin-or-tools/ThirdParty-Mumps.git
-    - cd ThirdParty-Mumps && ./configure
+    - cd ThirdParty-Mumps && ./get.Mumps
+    - ./configure
     - make && make install
     - cd /tmp/Ipopt/ThirdParty
     - git clone https://github.com/coin-or-tools/ThirdParty-ASL.git
