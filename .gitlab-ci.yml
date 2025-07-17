@@ -52,11 +52,11 @@ test:
     - cd ThirdParty-Mumps && ./get.Mumps
     - ./configure
     - make && make install
-    - cd /tmp/Ipopt/ThirdParty
+    - cd /opt/ipopt/Ipopt/ThirdParty
     - git clone https://github.com/coin-or-tools/ThirdParty-ASL.git
     - cd ThirdParty-ASL && ./configure
     - make && make install
-    - cd /tmp/Ipopt
+    - cd /opt/ipopt/Ipopt
     - mkdir build && cd build
     # Not using HSL for testing environment, because it requires license and stuff
     - ./configure --with-mumps-cflags=-I/usr/include/mumps_seq --with-mumps-lflags=-ldmumps_seq --without-hsl
