@@ -67,6 +67,8 @@ test:
 
     - ls /usr/local/lib
     - find /usr/local/lib -name libipoptamplinterface.*
+    - find / -name ipopt
+    - LD_LIBRARY_PATH=/usr/local/lib /usr/local/bin/ipopt
     # Highs
     - cd /opt
     - mkdir highs && cd highs
