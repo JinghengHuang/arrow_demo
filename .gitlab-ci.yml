@@ -71,7 +71,7 @@ test:
     - git clone https://github.com/ERGO-Code/HiGHS.git
     - cmake -S . -B build
     - cmake --build build
-    - ctest
+    - cd build && ctest
     # Julia
     - cd /tmp
     - wget https://julialang-s3.julialang.org/bin/linux/x64/${JULIA_VERSION:0:4}/julia-$JULIA_VERSION-linux-x86_64.tar.gz
