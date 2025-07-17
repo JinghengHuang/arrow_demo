@@ -68,10 +68,10 @@ test:
     # Highs
     - cd /opt
     - mkdir highs && cd highs
-    - wget https://github.com/JuliaBinaryWrappers/HiGHSstatic_jll.jl/releases/download/HiGHSstatic-v1.11.0%2B1/HiGHSstatic.v1.11.0.x86_64-linux-gnu-cxx11.tar.gz
-    - tar -zxf HiGHSstatic.v1.11.0.x86_64-linux-gnu-cxx11.tar.gz
-    - ln -s /opt/bin/highs /usr/bin/highs
-    - PATH=$PATH:~/opt/bin
+    - git clone https://github.com/ERGO-Code/HiGHS.git
+    - cmake -S . -B build
+    - cmake --build build
+    - ctest
     # Julia
     - cd /tmp
     - wget https://julialang-s3.julialang.org/bin/linux/x64/${JULIA_VERSION:0:4}/julia-$JULIA_VERSION-linux-x86_64.tar.gz
