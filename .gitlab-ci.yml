@@ -59,14 +59,14 @@ test:
     - make && make install
     - cd /opt/ipopt/Ipopt
     - mkdir build && cd build
-    - ls /usr/local/lib
-    - find /usr/local/lib -name libipoptamplinterface.so
     # Not using HSL for testing environment, because it requires license and stuff
     - ../configure --with-mumps-cflags=-I/usr/include/mumps_seq --with-mumps-lflags=-ldmumps_seq --without-hsl
     - make
     - make test 
     - make install
 
+    - ls /usr/local/lib
+    - find /usr/local/lib -name libipoptamplinterface.*
     # Highs
     - cd /opt
     - mkdir highs && cd highs
