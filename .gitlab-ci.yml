@@ -72,9 +72,6 @@ test:
     - tar -zxf HiGHSstatic.v1.11.0.x86_64-linux-gnu-cxx11.tar.gz
     - ln -s /opt/bin/highs /usr/bin/highs
     - PATH=$PATH:~/opt/bin
-    - ls
-    - ls bin
-    - ./bin/highs
     # Julia
     - cd /tmp
     - wget https://julialang-s3.julialang.org/bin/linux/x64/${JULIA_VERSION:0:4}/julia-$JULIA_VERSION-linux-x86_64.tar.gz
