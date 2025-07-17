@@ -68,7 +68,7 @@ test:
     # Highs
     - cd /opt
     - mkdir highs && cd highs
-    - git clone https://github.com/ERGO-Code/HiGHS.git
+    - git clone https://github.com/ERGO-Code/HiGHS.git && cd HiGHS
     - cmake -S . -B build
     - cmake --build build
     - cd build && ctest
