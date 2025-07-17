@@ -72,6 +72,7 @@ test:
     - cmake -S . -B build
     - cmake --build build
     - cd build && ctest
+    - PATH=$PATH:/opt/highs/HiGHS/build/bin
     # Julia
     - cd /tmp
     - wget https://julialang-s3.julialang.org/bin/linux/x64/${JULIA_VERSION:0:4}/julia-$JULIA_VERSION-linux-x86_64.tar.gz
