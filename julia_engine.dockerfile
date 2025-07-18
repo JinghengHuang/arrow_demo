@@ -64,16 +64,17 @@ WORKDIR /usr/src/app
 
 # Copy the current directory contents into the container at /usr/src/app
 COPY . .
-RUN rm -rf .VIRTUAL_ENV
-ENV VIRTUAL_ENV=/usr/src/app/.venv
-RUN python3 -m venv $VIRTUAL_ENV
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-# Install any needed packages specified in requirements.txt 
-RUN pip install --no-cache-dir -r requirements.txt
 
-RUN julia --project="." -e 'using Pkg; Pkg.add("JuMP", preserve=PRESERVE_DIRECT);'
+# Set env paths
+ENV PROJ_HOME=$PWD
+ENV JULIA_VERSION="1.11.5"
+ENV POETRY_VERSION="2.1.3"
+ENV PYTHONUNBUFFERED=1
+ENV IPOPT_VERSION="3.14.0"
+ENV PATH="$HOME/.local/bin:$PATH"
+ENV PYTHONPATH=$PWD
 
-RUN julia --project="." -e "using Pkg; Pkg.activate('Project.toml'); Pkg.instantiate()"
+RUN ./scripts/envSetup.sh
 
 # Make port 80 available to the world outside this container (Optional, only for web apps)
 EXPOSE 65432
@@ -82,4 +83,4 @@ EXPOSE 65432
 ENV NAME venv
 
 # Run app.py when the container launches
-CMD ["sh", "./startJulia"]
+CMD ["sh", "./scripts/startJulia.sh"]

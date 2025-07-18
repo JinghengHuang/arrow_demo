@@ -50,12 +50,17 @@ WORKDIR /usr/src/app
 
 # Copy the current directory contents into the container at /usr/src/app
 COPY . .
-RUN rm -rf .VIRTUAL_ENV
-ENV VIRTUAL_ENV=/usr/src/app/.venv
-RUN python3 -m venv $VIRTUAL_ENV
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-# Install any needed packages specified in requirements.txt 
-RUN pip install --no-cache-dir -r requirements.txt
+
+# Set env paths
+ENV PROJ_HOME="/usr/src/app"
+ENV JULIA_VERSION="1.11.5"
+ENV POETRY_VERSION="2.1.3"
+ENV PYTHONUNBUFFERED=1
+ENV IPOPT_VERSION="3.14.0"
+ENV PATH="root/.local/bin:$PATH"
+ENV PYTHONPATH="/usr/src/app"
+
+RUN ./scripts/envSetup.sh
 
 # Make port 80 available to the world outside this container (Optional, only for web apps)
 EXPOSE 8000
@@ -63,5 +68,7 @@ EXPOSE 8000
 # Define environment variable (optional)
 ENV NAME venv
 
+# Check python address
+RUN whereis python
 # Run app.py when the container launches
-CMD ["sh", "./startServer"]
+CMD ["sh", "./scripts/startServer.sh"]
