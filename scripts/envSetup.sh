@@ -57,8 +57,10 @@ cd $PROJ_HOME
 echo $PROJ_HOME
 curl -sSL https://install.python-poetry.org | python3 -
 export PATH="$HOME/.local/bin:$PATH"
-poetry config virtualenvs.create true
-poetry install --no-interaction --no-root
+poetry config virtualenvs.create false
+poetry cache clear pypi --all -n
+poetry cache clear --all
+poetry install --no-interaction  --no-ansi --no-root
 poetry env list
 source `poetry env info --path`/bin/activate
 export PYTHONPATH=$PWD

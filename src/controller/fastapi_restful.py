@@ -11,11 +11,14 @@ app = FastAPI()
 endpoint = Endpoint()
 
 @app.post("/compute")
-async def compute(request: Request):
-    """
-    Execute computation using a model and data, either from ID or inline.
-    :param request: Request object containing the payload
-    :return: Response with result metadata and output
+async def compute(request: Request) -> Response:
+    """Execute computation using a model and data.
+
+    Args:
+        request (Request): request object with model info.
+
+    Returns:
+        Response: response object with results and/or messages.
     """
     try:
         raw = await request.body()
@@ -34,7 +37,7 @@ async def compute(request: Request):
             )
         return Response(
             content = result.column("error_message")[0].as_py(),
-            status_code = status.HTTP_400_BAD_REQUEST,
+            status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
             media_type= "application/vnd.apache.arrow.stream"
         )
     except (ValueError, KeyError) as e:
