@@ -96,7 +96,7 @@ class QPProblem:
         sleep_time = 1
         timeout_count = 5
         if "highs" in self.solver.name.lower(): 
-            opt = HiGHS(solution_file=sol_path, **solver_params)
+            opt = HiGHS(solution_file=sol_path, log_file="/dev/null", **solver_params)
             result = opt.solve(self.model)
             while not os.path.exists(sol_path):
                 time.sleep(sleep_time)
