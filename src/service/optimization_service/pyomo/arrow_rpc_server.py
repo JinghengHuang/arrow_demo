@@ -27,11 +27,9 @@ class FlightServer(pyarrow.flight.FlightServerBase):
     It provides methods to handle dataset management and solver execution.
     """
 
-    def __init__(self, location="grpc://0.0.0.0:8815",
-                repo=pathlib.Path("./datasets"), **kwargs):
+    def __init__(self, location="grpc://0.0.0.0:8815", **kwargs):
         super(FlightServer, self).__init__(location, **kwargs)
         self._location = location
-        self._repo = repo
         self._tables:dict = {}
         self._lock = threading.Lock()
         self.executor = ThreadPoolExecutor(max_workers=4)
@@ -47,10 +45,6 @@ class FlightServer(pyarrow.flight.FlightServerBase):
             return pyarrow.flight.FlightInfo(schema,
                                             descriptor,
                                             endpoints,-1,-1)
-
-    def list_flights(self, context, criteria):
-        for dataset in self._repo.iterdir():
-            yield self._make_flight_info(dataset.name)
 
     def get_flight_info(self, context, descriptor):
         return self._make_flight_info(descriptor.path[0].decode('utf-8'))
@@ -137,14 +131,12 @@ def grpc_serve_addr(ipaddr:str, port:int, ext_logger) -> None:
         server = FlightServer(location=f"grpc://{ipaddr}:{port}")
     else:
         server = FlightServer()
-    server._repo.mkdir(exist_ok=True)
     logger.info("Server running at " + server._location)
     server.serve()
 
 # Use when run standalone
 def grpc_serve() -> None:
     server = FlightServer()
-    server._repo.mkdir(exist_ok=True)
     logger.info("Server running at " + server._location)
     server.serve()
 

@@ -71,6 +71,8 @@ class LPProblem:
         self.solver = solver
 
     def solve(self, solver_params=None):
+        # Add /usr/local/lib to LD_LIBRARY_PATH, for ipopt
+        os.environ["LD_LIBRARY_PATH"] = "/usr/local/lib:" + os.environ.get("LD_LIBRARY_PATH", "")
         if self.model is None or self.solver is None:
             raise RuntimeError("Model not built or solver not assigned.")
         opt = SolverFactory(self.solver.name.lower())

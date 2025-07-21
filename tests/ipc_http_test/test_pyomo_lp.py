@@ -55,68 +55,68 @@ def test_pyomo_service():
     print(f"Post request: {post}")
     print(f"Time diff: {diff}")
 
-# # No server
-# def test_pyomo_lp_highs():
+# No server
+def test_pyomo_lp_highs():
+    dict["solver"] = {
+            "solver_name": "Highs",
+            "solver_type": "LP",
+            "solver_params": {"presolve": True, "dual": True, "primal": True}
+        }
+    # Stress test
+    solver = CobraLPSolver()
+    result = solver.run(dict)
+    print(result)
+    assert "Exception" not in str(result)
+    assert "Error" not in str(result)
+    assert result.get("solution") is not None
+    print(result)
+def test_pyomo_lp_glpk():
+    dict["solver"] = {
+            "solver_name": "glpk",
+            "solver_type": "LP",
+        }
+    # Stress test
+    solver = CobraLPSolver()
+    result = solver.run(dict)
+    assert "Exception" not in str(result)
+    assert "Error" not in str(result)
+    assert result.get("solution") is not None
+    print(result)
+# def test_pyomo_lp_cplex():
 #     dict["solver"] = {
-#             "solver_name": "Highs",
+#             "solver_name": "cplex",
 #             "solver_type": "LP",
 #             "solver_params": {"presolve": True, "dual": True, "primal": True}
 #         }
 #     # Stress test
 #     solver = CobraLPSolver()
 #     result = solver.run(dict)
-#     print(result)
 #     assert "Exception" not in str(result)
 #     assert "Error" not in str(result)
-#     assert result.get("solution") is not None
 #     print(result)
-# def test_pyomo_lp_glpk():
-#     dict["solver"] = {
-#             "solver_name": "glpk",
-#             "solver_type": "LP",
-#         }
-#     # Stress test
-#     solver = CobraLPSolver()
-#     result = solver.run(dict)
-#     assert "Exception" not in str(result)
-#     assert "Error" not in str(result)
-#     assert result.get("solution") is not None
-#     print(result)
-# # def test_pyomo_lp_cplex():
-# #     dict["solver"] = {
-# #             "solver_name": "cplex",
-# #             "solver_type": "LP",
-# #             "solver_params": {"presolve": True, "dual": True, "primal": True}
-# #         }
-# #     # Stress test
-# #     solver = CobraLPSolver()
-# #     result = solver.run(dict)
-# #     assert "Exception" not in str(result)
-# #     assert "Error" not in str(result)
-# #     print(result)
-# def test_pyomo_lp_gurobi():
-#     dict["solver"] = {
-#             "solver_name": "gurobi",
-#             "solver_type": "LP",
-#             "solver_params": {"presolve": True, "quad": 1}
-#         }
-#     # Stress test
-#     solver = CobraLPSolver()
-#     result = solver.run(dict)
-#     assert "Exception" not in str(result)
-#     assert "Error" not in str(result)
-#     assert result.get("solution") is not None
-#     print(result)
+def test_pyomo_lp_gurobi():
+    dict["solver"] = {
+            "solver_name": "gurobi",
+            "solver_type": "LP",
+            "solver_params": {"presolve": True, "quad": 1}
+        }
+    # Stress test
+    solver = CobraLPSolver()
+    result = solver.run(dict)
+    assert "Exception" not in str(result)
+    assert "Error" not in str(result)
+    assert result.get("solution") is not None
+    print(result)
     
-# def test_pyomo_lp_ipopt():
-#     dict["solver"] = {
-#             "solver_name": "ipopt",
-#             "solver_type": "LP",
-#         }
-#     # Stress test
-#     solver = CobraLPSolver()
-#     result = solver.run(dict)
-#     assert "Exception" not in str(result)
-#     assert "Error" not in str(result)
-#     assert result.get("solution") is not None
-#     print(result)
+def test_pyomo_lp_ipopt():
+    dict["solver"] = {
+            "solver_name": "ipopt",
+            "solver_type": "LP",
+        }
+    # Stress test
+    solver = CobraLPSolver()
+    result = solver.run(dict)
+    assert "Exception" not in str(result)
+    assert "Error" not in str(result)
+    assert result.get("solution") is not None
+    print(result)

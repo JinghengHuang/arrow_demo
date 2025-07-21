@@ -1,8 +1,0 @@
-auth
-controller
-datasets
-objects
-protobuf
-sample
-service
-utils
