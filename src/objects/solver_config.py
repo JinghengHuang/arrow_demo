@@ -22,6 +22,14 @@ class SolverConfig(ArrowModel):
         :param solver_name: Name of the solver (e.g., "Highs", "GLPK", etc.)
         :param solver_type: Type of the solver (e.g., "LP", "MILP", etc.)
         :param params: Additional parameters for the solver, if any
+
+        Args:
+            solver_dict (dict): solver configuration dict, params include:
+                solver_name: Name of the solver (e.g., "Highs", "GLPK", etc.)
+                solver_type: Type of the solver (e.g., "LP", "MILP", etc.)
+
+        Raises:
+            ValueError: handles wrongful input, such as empty solver name or unsupported solver type.
         """
         solver_name = solver_dict.get("solver_name")
         solver_type = solver_dict.get("solver_type")

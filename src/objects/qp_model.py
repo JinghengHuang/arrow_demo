@@ -33,17 +33,20 @@ class QPModel(ArrowModel):
         """
         Initialize QP model.
 
-        Required:
-            - Q (RecordBatch): Sparse quadratic coefficient matrix in COO format with "row", "col", "val"
-            - c (Array): Linear coefficients
-            - A (RecordBatch): Sparse equality constraint matrix in COO format with "row", "col", "val"
-            - b (Array): Right-hand side vector for equality constraints
-        Optional:
-            - G (RecordBatch): Sparse inequality constraint matrix in COO format with "row", "col", "val"
-            - h (Array): Right-hand side vector for inequality constraints
-            - lb (Array): Lower bounds for variables (default: None, treated as unbounded)
-            - ub (Array): Upper bounds for variables (default: None, treated as unbounded)
-            - osense (Scalar): "min" or "max" (default: "min
+
+        Args:
+            model_dict: Dict including model info. Parameters listed as below.
+                Required:
+                    - Q (RecordBatch): Sparse quadratic coefficient matrix in COO format with "row", "col", "val"
+                    - c (Array): Linear coefficients
+                    - A (RecordBatch): Sparse equality constraint matrix in COO format with "row", "col", "val"
+                    - b (Array): Right-hand side vector for equality constraints
+                Optional:
+                    - G (RecordBatch): Sparse inequality constraint matrix in COO format with "row", "col", "val"
+                    - h (Array): Right-hand side vector for inequality constraints
+                    - lb (Array): Lower bounds for variables (default: None, treated as unbounded)
+                    - ub (Array): Upper bounds for variables (default: None, treated as unbounded)
+                    - osense (Scalar): "min" or "max" (default: "min
         """
         Q = pa.RecordBatch.from_pydict(model_dict.get("Q"))
         c = model_dict.get("c")

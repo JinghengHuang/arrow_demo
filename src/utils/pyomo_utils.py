@@ -16,6 +16,15 @@ def change_cobra_solver(name: str, params=None, print_level=1) -> SolverConfig:
 
 
 def sparse_dict_to_dense(S_dict, shape=None):
+    """Converts pandas sparce array to dense array
+
+    Args:
+        S_dict (Dict): sparse array dict
+        shape (Dict, optional): shape dict. Defaults to None.
+
+    Returns:
+        List: dense array
+    """
     row = S_dict["row"]
     col = S_dict["col"]
     data = S_dict["val"]

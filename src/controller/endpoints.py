@@ -32,11 +32,14 @@ class Endpoint:
         """
         Execute computation using a model and data, either from ID or inline.
 
-        :param payload: Dict with fields:
-            - modelId or model
-            - dataId or data
-            - dataName (optional)
-        :return: Dict with result metadata and output
+        Args:
+            payload (Dict): with fields:
+            - model_name: str, name of model
+            - model: Dict, model configuration
+            - solver: Dict, solver configuration
+
+        Returns:
+            Dict: result metadata and output
         """
         engine = payload.column("engine")[0].as_py()
         optimization_service = self.service_factory.create_service(engine)
