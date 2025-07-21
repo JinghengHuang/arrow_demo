@@ -59,6 +59,7 @@ ENV PYTHONUNBUFFERED=1
 ENV IPOPT_VERSION="3.14.0"
 ENV PATH="root/.local/bin:$PATH"
 ENV PYTHONPATH="/usr/src/app"
+ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
 
 RUN ./scripts/envSetup.sh
 
