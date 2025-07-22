@@ -33,7 +33,7 @@ class SolverModel(ArrowModel):
         """
         solver_name = solver_dict.get("solver_name")
         solver_type = solver_dict.get("solver_type")
-        params = solver_dict.get("params", {})
+        params = solver_dict.get("solver_params", {})
 
         self.solver_name = solver_name
         if not solver_name:
