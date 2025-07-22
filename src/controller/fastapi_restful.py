@@ -1,7 +1,6 @@
 """
 Endpoints for the optimization service API
 """
-import logging
 import pyarrow as pa
 from fastapi import Request
 from fastapi import FastAPI, status
@@ -31,20 +30,17 @@ async def compute(request: Request) -> Response:
             with pa.ipc.new_stream(sink, result.schema) as writer:
                 writer.write(result)
             ipc_bytes = sink.getvalue().to_pybytes()
-            logging.info("%s", result)
             return Response(
                 content = ipc_bytes,
                 status_code = status.HTTP_200_OK,
                 media_type= "application/vnd.apache.arrow.stream"
             )
-        logging.error("Computation failed: %s", result.column('error_message')[0].as_py())
         return Response(
             content = result.column("error_message")[0].as_py(),
             status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
             media_type= "application/vnd.apache.arrow.stream"
         )
     except (ValueError, KeyError) as e:
-        logging.error("Request failed: %s: %s", type(e).__name__, str(e))
         return Response(
             content = f"{type(e).__name__}: {str(e)}",
             status_code = status.HTTP_400_BAD_REQUEST,
