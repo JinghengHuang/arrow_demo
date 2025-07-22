@@ -73,6 +73,13 @@ def test_julia_flow(solver):
     # assert , if solver is Gurobi and Mosek, the response should be 500 due to missing license
     if solver["solver_name"] in ["Gurobi", "MOSEK"]:
         assert response.status_code == 500, f"Request failed with status code {response.status_code}"
+        assert "license" in response.text.lower(), "License error message not found in response"
+    elif solver["solver_name"] == "GLPK":
+        assert response.status_code == 500, f"Request failed with status code {response.status_code}"
+        assert "MathOptInterface.UnsupportedAttribute" in response.text, "GLPK error message not found in response"
+    elif solver["solver_name"] == "HiGHS" and solver["solver_params"].get("presolve", 0) != 0:
+        assert response.status_code == 500, f"Request failed with status code {response.status_code}"
+        assert "Invalid value" in response.text
     else:
         assert response.status_code == 200, f"Request failed with status code {response.status_code}"
         # check if the response is a valid ipc stream
