@@ -55,8 +55,3 @@ def test_julia_flow(solver):
     print(f"Pre request: {pre}")
     print(f"Post request: {post}")
     print(f"Time diff: {diff}")
-
-# for solver in solvers:
-#     # if solver["solver_name"] == "HiGHS":
-#         test_julia_flow(solver)  # Run the test for each solver
-#         sleep(3)  # Optional: sleep to avoid overwhelming the server with requests
