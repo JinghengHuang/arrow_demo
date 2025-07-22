@@ -1,1 +1,1 @@
-PYTHONPATH=. python src/run_server.py
+poetry run python src/run_server.py

@@ -67,6 +67,14 @@ COPY . .
 
 # Set env paths
 ENV PROJ_HOME=$PWD
+ENV PYTHONFAULTHANDLER=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONHASHSEED=random \
+    PIP_NO_CACHE_DIR=off \
+    PIP_DISABLE_PIP_VERSION_CHECK=on \
+    PIP_DEFAULT_TIMEOUT=100 \
+    # Poetry's configuration:
+    POETRY_NO_INTERACTION=1
 ENV JULIA_VERSION="1.11.5"
 ENV POETRY_VERSION="2.1.3"
 ENV PYTHONUNBUFFERED=1
@@ -83,4 +91,4 @@ EXPOSE 8101
 ENV NAME venv
 
 # Run app.py when the container launches
-CMD ["sh", "./scripts/staryPyEngine.sh"]
+CMD ["bash", "-c", "source /etc/profile.d/myenv.sh && ./scripts/staryPyEngine.sh"]

@@ -1,6 +1,6 @@
 # Use an official Python runtime as a parent image
 FROM ubuntu:latest
-
+SHELL ["/bin/bash", "-c"]
 # Set environment variables for configuration
 RUN apt-get update && \
     apt-get install -y \
@@ -52,10 +52,17 @@ WORKDIR /usr/src/app
 COPY . .
 
 # Set env paths
+ENV PYTHONFAULTHANDLER=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONHASHSEED=random \
+    PIP_NO_CACHE_DIR=off \
+    PIP_DISABLE_PIP_VERSION_CHECK=on \
+    PIP_DEFAULT_TIMEOUT=100 \
+    # Poetry's configuration:
+    POETRY_NO_INTERACTION=1
 ENV PROJ_HOME="/usr/src/app"
 ENV JULIA_VERSION="1.11.5"
 ENV POETRY_VERSION="2.1.3"
-ENV PYTHONUNBUFFERED=1
 ENV IPOPT_VERSION="3.14.0"
 ENV PATH="root/.local/bin:$PATH"
 ENV PYTHONPATH="/usr/src/app"
@@ -70,6 +77,6 @@ EXPOSE 8000
 ENV NAME venv
 
 # Check python address
-RUN whereis python
+RUN source /etc/profile.d/myenv.sh && whereis python
 # Run app.py when the container launches
-CMD ["sh", "./scripts/startServer.sh"]
+CMD ["bash", "-c", "source /etc/profile.d/myenv.sh && ./scripts/startServer.sh"]

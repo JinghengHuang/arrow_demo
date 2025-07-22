@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 echo "Start installing dependencies..."
 echo $PROJ_HOME
 echo "Installing Solvers(GLPK, IPOPT, HIGHS)"
@@ -59,8 +58,9 @@ cd $PROJ_HOME
 echo $PROJ_HOME
 curl -sSL https://install.python-poetry.org | python3 -
 export PATH="$HOME/.local/bin:$PATH"
-poetry config virtualenvs.create true
-poetry config virtualenvs.in-project true
-poetry cache clear --all
 poetry install --no-interaction  --no-ansi --no-root
 export PYTHONPATH=$PWD
+
+echo "export LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH:/usr/local/lib\"" >> /etc/profile.d/myenv.sh
+echo "export PATH=\"$PATH:/opt/highs/HiGHS/build/bin:$HOME/.local/bin\"" >> /etc/profile.d/myenv.sh
+echo "export PYTHONPATH=$PWD" >> /etc/profile.d/myenv.sh
