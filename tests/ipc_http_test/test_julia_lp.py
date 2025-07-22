@@ -55,6 +55,10 @@ def test_julia_flow(solver):
     # assert , if solver is Gurobi and Mosek, the response should be 500 due to missing license
     if solver["solver_name"] in ["Gurobi", "MOSEK"]:
         assert response.status_code == 500, f"Request failed with status code {response.status_code}"
+        assert "license" in response.text.lower(), "License error message not found in response"
+    elif solver["solver_name"] == "Hypatia" and solver["solver_params"].get("presolve", 0) != 0:
+        assert response.status_code == 500, f"Request failed with status code {response.status_code}"
+        assert "ErrorException" in response.text
     else:
         assert response.status_code == 200, f"Request failed with status code {response.status_code}"
         # check if the response is a valid ipc stream
