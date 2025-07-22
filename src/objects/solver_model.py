@@ -6,9 +6,9 @@
 from objects.base_model import ArrowModel
 
 
-class SolverConfig(ArrowModel):
+class SolverModel(ArrowModel):
     """
-    SolverConfig: Configuration for the optimization solver
+    SolverModel: Configuration for the optimization solver
     This class provides a way to define the solver configuration, including the solver name,
     solver type, and any additional parameters needed for the solver.
     It inherits from ArrowModel to ensure compatibility with Arrow's in-memory format.
