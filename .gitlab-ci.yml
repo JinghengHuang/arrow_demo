@@ -43,7 +43,7 @@ test:
     - apt-get install -y libglpk-dev glpk-utils
     - glpsol --version
     # IPOPT
-    - apt-get install -y gfortran  gcc  g++  make  wget  unzip  pkg-config  liblapack-dev  libblas-dev  libtool  coinor-libipopt-dev  build-essential  git  cmake  python3-dev  python3-pip  libopenblas-dev  libmumps-seq-dev  libmetis-dev
+    - apt-get install -y gfortran netcat gcc  g++  make  wget  unzip  pkg-config  liblapack-dev  libblas-dev  libtool  coinor-libipopt-dev  build-essential  git  cmake  python3-dev  python3-pip  libopenblas-dev  libmumps-seq-dev  libmetis-dev
     - mkdir /opt/ipopt && cd /opt/ipopt
     - git clone https://github.com/coin-or/Ipopt.git
     - cd Ipopt
