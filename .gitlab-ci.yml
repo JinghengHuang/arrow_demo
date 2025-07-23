@@ -95,7 +95,7 @@ test:
     - poetry install --no-interaction --no-ansi --no-root
     - source `poetry env info --path`/bin/activate
   script:
-    - sh ./scripts/startAll.sh
+    - sh ./scripts/startAll.sh > /dev/null 2>&1 &
     - sleep 45
     - poetry run pytest --junitxml=junit.xml --timeout=10
   artifacts:
