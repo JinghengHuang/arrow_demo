@@ -21,6 +21,15 @@ class GrpcComputeService(BaseService):
 
 
     def compute(self, model = None, solver = None, model_name = None) -> pa.Table:
+        """Compute method implementation based on Flight gRPC
+
+        Args:
+            model (dict): The model to compute
+            solver (dict): The solver configuration to use
+            model_name (str, optional): Optional name for the model. Defaults to None.
+        Returns:
+            pa.Table: Result of the computation as a PyArrow Table
+        """
         client = pyarrow.flight.connect(f"grpc://{self.gRPC_ip}:{self.gRPC_port}")
         client.as_async()
         print(client.supports_async)

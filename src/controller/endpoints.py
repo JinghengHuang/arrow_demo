@@ -7,6 +7,7 @@ from objects.lp_model import LPModel
 from objects.qp_model import QPModel
 from objects.solver_config import SolverConfig
 from service.service_factory import ServiceFactory
+from utils.dict_to_pa_table import dict_to_pa_table
 
 
 class Endpoint:
@@ -32,11 +33,14 @@ class Endpoint:
         """
         Execute computation using a model and data, either from ID or inline.
 
-        :param payload: Dict with fields:
-            - modelId or model
-            - dataId or data
-            - dataName (optional)
-        :return: Dict with result metadata and output
+        Args:
+            payload (Dict): with fields:
+            - model_name: str, name of model
+            - model: Dict, model configuration
+            - solver: Dict, solver configuration
+
+        Returns:
+            Dict: result metadata and output
         """
         engine = payload.column("engine")[0].as_py()
         optimization_service = self.service_factory.create_service(engine)
@@ -51,10 +55,7 @@ class Endpoint:
             model = QPModel(payload.column("model")[0].as_py())
         result = optimization_service.compute(model, solver, model_name)
         if result.column("success")[0].as_py():
-            return True, pa.RecordBatch.from_pydict({
-                "solution": [result.column("solution")[0].as_py()],
-                "objective_value": [result.column("obj_val")[0].as_py()],
-            })
+            return True, result
         return False, pa.RecordBatch.from_pydict({
                 "error_message": [result.column("error_message")[0].as_py()]
             })

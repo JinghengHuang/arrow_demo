@@ -1,1 +1,1 @@
-PYTHONPATH=. python src/run_all.py
+poetry run python src/run_all.py

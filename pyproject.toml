@@ -3,7 +3,8 @@ name = "arrow-gateway-engine"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "Your Name",email = "you@example.com"}
+    {name = "Yixing Lei",email = "Y.Lei3@universityofgalway.ie"},
+    {name = "Jingheng Huang",email = "j.huang10@universityofgalway.ie"}
 ]
 packages = [
     { include = "mypackage", from = "src" }

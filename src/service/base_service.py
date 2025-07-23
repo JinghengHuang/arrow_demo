@@ -15,10 +15,14 @@ class BaseService():
     def compute(self, model, solver, model_name=None):
         """Run compute service, returns result of computation
             
-        :param model: The model to compute
-        :param solver: The solver configuration to use
-        :param model_name: Optional name for the model
-        :return: Result of the computation as a PyArrow Table
-        :raises NotImplementedError: If the method is not implemented in the subclass
+
+        Args:
+            model (dict): The model to compute
+            solver (dict): The solver configuration to use
+            model_name (str, optional): Optional name for the model. Defaults to None.
+        Returns:
+            pa.Table: Result of the computation as a PyArrow Table
+        Raises:
+            NotImplementedError: If the method is not implemented in the subclass
         """
         raise NotImplementedError("Subclasses must implement compute method")

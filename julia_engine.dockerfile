@@ -83,4 +83,4 @@ EXPOSE 65432
 ENV NAME venv
 
 # Run app.py when the container launches
-CMD ["sh", "./scripts/startJulia.sh"]
+CMD ["bash", "-c", "source /etc/profile.d/myenv.sh && ./scripts/startJulia.sh"]

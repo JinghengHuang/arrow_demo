@@ -21,6 +21,15 @@ class JuliaComputeService(BaseService):
 
 
     def compute(self, model = None, solver = None, model_name = None) -> pa.Table:
+        """Compute method implementation based on Socket and Julia service
+
+        Args:
+            model (dict): The model to compute
+            solver (dict): The solver configuration to use
+            model_name (str, optional): Optional name for the model. Defaults to None.
+        Returns:
+            pa.Table: Result of the computation as a PyArrow Table
+        """
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
             client_socket.connect((self.julia_ip, self.julia_port))
 

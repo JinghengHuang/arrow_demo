@@ -1,4 +1,5 @@
 #!/bin/bash
+echo "Start installing dependencies..."
 echo $PROJ_HOME
 echo "Installing Solvers(GLPK, IPOPT, HIGHS)"
 apt-get update && apt-get install -y curl
@@ -31,7 +32,7 @@ make install
 ls /usr/local/lib
 find /usr/local/lib -name libipoptamplinterface.*
 find / -name ipopt
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
 # Highs
 cd /opt
 mkdir highs && cd highs
@@ -57,10 +58,9 @@ cd $PROJ_HOME
 echo $PROJ_HOME
 curl -sSL https://install.python-poetry.org | python3 -
 export PATH="$HOME/.local/bin:$PATH"
-poetry config virtualenvs.create false
-poetry cache clear pypi --all -n
-poetry cache clear --all
 poetry install --no-interaction  --no-ansi --no-root
-poetry env list
-source `poetry env info --path`/bin/activate
 export PYTHONPATH=$PWD
+
+echo "export LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH:/usr/local/lib\"" >> /etc/profile.d/myenv.sh
+echo "export PATH=\"$PATH:/opt/highs/HiGHS/build/bin:$HOME/.local/bin\"" >> /etc/profile.d/myenv.sh
+echo "export PYTHONPATH=$PWD" >> /etc/profile.d/myenv.sh

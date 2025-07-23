@@ -33,16 +33,18 @@ class LPModel(ArrowModel):
         """
         Initialize an LP model.
 
-        Required:
-            - A (RecordBatch): Sparse constraint matrix in COO format with "row", "col", "val"
-            - b (Array): Right-hand side vector
-            - c (Array): Objective function coefficients
+        Args:
+            model_dict: Dict including model info. Parameters listed as below.
+                Required:
+                    - A (RecordBatch): Sparse constraint matrix in COO format with "row", "col", "val"
+                    - b (Array): Right-hand side vector
+                    - c (Array): Objective function coefficients
 
-        Optional:
-            - lb (Array): Lower bounds (default: None, treated as unbounded)
-            - ub (Array): Upper bounds (default: None, treated as unbounded)
-            - osense (Scalar): "min" or "max" (default: "min")
-            - csense (Array): ["E", "L", "G"] (default: all "E")
+                Optional:
+                    - lb (Array): Lower bounds (default: None, treated as unbounded)
+                    - ub (Array): Upper bounds (default: None, treated as unbounded)
+                    - osense (Scalar): "min" or "max" (default: "min")
+                    - csense (Array): ["E", "L", "G"] (default: all "E")
 
         Raises:
             TypeError / ValueError if inputs are malformed

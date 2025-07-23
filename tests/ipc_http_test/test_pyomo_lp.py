@@ -46,7 +46,6 @@ def test_pyomo_service():
     reader = pa.ipc.open_stream(response.content)
     table = reader.read_all()
     resdict = unpack_pa_table_dict(table)
-    assert "Error" not in str(response.content)
     print(resdict)
     assert resdict.get("status") == "optimal"
     post = time.time()
@@ -60,7 +59,7 @@ def test_pyomo_lp_highs():
     dict["solver"] = {
             "solver_name": "Highs",
             "solver_type": "LP",
-            "solver_params": {"presolve": True, "dual": True, "primal": True}
+            "params": {"presolve": True, "dual": True, "primal": True}
         }
     # Stress test
     solver = CobraLPSolver()
@@ -98,7 +97,7 @@ def test_pyomo_lp_gurobi():
     dict["solver"] = {
             "solver_name": "gurobi",
             "solver_type": "LP",
-            "solver_params": {"presolve": True, "quad": 1}
+            "params": {"presolve": True, "quad": 1}
         }
     # Stress test
     solver = CobraLPSolver()

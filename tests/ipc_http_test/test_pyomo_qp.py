@@ -108,7 +108,7 @@ def test_pyomo_qp_highs():
         "solver_name": "HiGHS",
         "solver_type": "QP",
         # some params not supported on QP, see https://ergo-code.github.io/HiGHS/dev/options/definitions/#option-definitions for lists of supported params
-        "solver_params": {"presolve": "on", "time_limit": 10, "parallel": "on"}
+        "params": {"presolve": "on", "time_limit": 10, "parallel": "on"}
     }
     solver = CobraQPSolver()
     result = solver.run(model)
@@ -138,7 +138,7 @@ def test_pyomo_qp_gurobi():
     model["solver"] = {
         "solver_name": "gurobi",
         "solver_type": "QP",
-        "solver_params": {"presolve": True, "quad": 1}
+        "params": {"presolve": True, "quad": 1}
     }
     solver = CobraQPSolver()
     result = solver.run(model)

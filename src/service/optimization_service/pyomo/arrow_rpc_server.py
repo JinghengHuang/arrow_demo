@@ -50,6 +50,14 @@ class FlightServer(pyarrow.flight.FlightServerBase):
         return self._make_flight_info(descriptor.path[0].decode('utf-8'))
 
     def do_put(self, context, descriptor, reader, writer):
+        """Execute PUT methods, used in uploading data.
+
+        Args:
+            context (dict): upload descriptor
+            descriptor (dict): data schema
+            reader (Reader): data reader
+            writer (Writer): data writer
+        """
         dataset:str = descriptor.path[0].decode('utf-8')
         data_table = reader.read_all()
         problem = ""
@@ -71,6 +79,18 @@ class FlightServer(pyarrow.flight.FlightServerBase):
                 self._tables[dataset] = data_table
 
     def do_get(self, context, ticket):
+        """Execute GET requests, used to do solvers
+
+        Args:
+            context (dict): upload descriptor
+            ticket (Ticket): Flight Ticket with request information and parameters
+
+        Raises:
+            pa.flight.FlightServerError: When internal server error happens
+
+        Returns:
+            pa.flight.RecordBatchStream: solver result.
+        """
         with self._lock:
             ticket_str:str = ticket.ticket.decode('utf-8')
             # handle do solvers
@@ -118,7 +138,7 @@ class FlightServer(pyarrow.flight.FlightServerBase):
         try:
             result = solver.run(input_params)
             logger.info(result)
-            result_table = dict_to_pa_table(result).append_column("success", pa.array([True]))
+            result_table = dict_to_pa_table(result)
         except Exception as e:
             logger.error(f"Solver execution failed: {e}")
             result_table = pa.Table.from_pydict({"success" : [False],"error_message": [str(e)]})
@@ -126,6 +146,13 @@ class FlightServer(pyarrow.flight.FlightServerBase):
 
 
 def grpc_serve_addr(ipaddr:str, port:int, ext_logger) -> None:
+    """Serve the gRPC on a address and port
+
+    Args:
+        ipaddr (str): ip address, normally localhost
+        port (int): service port
+        ext_logger (_type_): logger object
+    """
     logger = ext_logger
     if ipaddr is not None and port is not None:
         server = FlightServer(location=f"grpc://{ipaddr}:{port}")
