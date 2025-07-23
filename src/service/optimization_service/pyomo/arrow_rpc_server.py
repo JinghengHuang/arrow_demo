@@ -138,7 +138,7 @@ class FlightServer(pyarrow.flight.FlightServerBase):
         try:
             result = solver.run(input_params)
             logger.info(result)
-            result_table = dict_to_pa_table(result).append_column("success", pa.array([True]))
+            result_table = dict_to_pa_table(result)
         except Exception as e:
             logger.error(f"Solver execution failed: {e}")
             result_table = pa.Table.from_pydict({"success" : [False],"error_message": [str(e)]})

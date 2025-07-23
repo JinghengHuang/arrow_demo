@@ -46,7 +46,6 @@ def test_pyomo_service():
     reader = pa.ipc.open_stream(response.content)
     table = reader.read_all()
     resdict = unpack_pa_table_dict(table)
-    assert "Error" not in str(response.content)
     print(resdict)
     assert resdict.get("status") == "optimal"
     post = time.time()

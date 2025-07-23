@@ -5,6 +5,7 @@ from typing import Dict
 import pyarrow as pa
 from objects.model_factory import ModelFactory
 from service.service_factory import ServiceFactory
+from utils.dict_to_pa_table import dict_to_pa_table
 
 
 class Endpoint:
@@ -50,10 +51,7 @@ class Endpoint:
         )
         result = optimization_service.compute(data_model, solver_model, model_name)
         if result.column("success")[0].as_py():
-            return True, pa.RecordBatch.from_pydict({
-                "solution": [result.column("solution")[0].as_py()],
-                "objective_value": [result.column("obj_val")[0].as_py()],
-            })
+            return True, result
         return False, pa.RecordBatch.from_pydict({
                 "error_message": [result.column("error_message")[0].as_py()]
             })
