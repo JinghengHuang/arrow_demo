@@ -66,9 +66,9 @@ def test_julia_flow(solver):
         result_table = reader.read_all()
         assert result_table.num_rows > 0, "Result table is empty"
         assert "solution" in result_table.column_names, "Solution column not found in result table"
-        assert "objective_value" in result_table.column_names, "Objective value column not found in result table"
+        assert "obj_val" in result_table.column_names, "Objective value column not found in result table"
         solution = result_table.column("solution")[0].as_py()
-        objective_value = result_table.column("objective_value")[0].as_py()
+        objective_value = result_table.column("obj_val")[0].as_py()
         assert solution is not None, "Solution is None"
         assert objective_value is not None, "Objective value is None"
         # check the number of variables in the solution matches the number of variables in the model
