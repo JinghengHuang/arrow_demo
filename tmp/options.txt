@@ -1,3 +1,0 @@
-presolve = on
-parallel = on
-log_file = /dev/null
