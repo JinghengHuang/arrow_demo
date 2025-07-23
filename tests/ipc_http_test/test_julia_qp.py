@@ -48,10 +48,6 @@ def test_julia_flow(solver):
     # send the request
     response = requests.post(url, data=ipc_bytes, headers=headers)
 
-    # check the response
-    print(response.status_code)
-    print(response.content)
-    
     post = time.time()
     diff = post - pre
     print(f"Pre request: {pre}")
@@ -73,3 +69,29 @@ def test_julia_flow(solver):
 
 # if __name__ == "__main__":
 #     asyncio.run(main())
+
+    # assert , if solver is Gurobi and Mosek, the response should be 500 due to missing license
+    if solver["solver_name"] in ["Gurobi", "MOSEK"]:
+        assert response.status_code == 500, f"Request failed with status code {response.status_code}"
+        assert "license" in response.text.lower(), "License error message not found in response"
+    elif solver["solver_name"] == "GLPK":
+        assert response.status_code == 500, f"Request failed with status code {response.status_code}"
+        assert "MathOptInterface.UnsupportedAttribute" in response.text, "GLPK error message not found in response"
+    elif solver["solver_name"] == "HiGHS" and solver["solver_params"].get("presolve", 0) != 0:
+        assert response.status_code == 500, f"Request failed with status code {response.status_code}"
+        assert "Invalid value" in response.text
+    else:
+        assert response.status_code == 200, f"Request failed with status code {response.status_code}"
+        # check if the response is a valid ipc stream
+        reader = pa.ipc.open_stream(response.content)
+        result_table = reader.read_all()
+        assert isinstance(result_table, pa.Table), "Response is not a valid IPC stream"
+        assert "solution" in result_table.column_names, "Response does not contain 'solution' column"
+        assert result_table.num_rows > 0, "Response table is empty"
+        print(f"Test passed for solver: {solver['solver_name']}")
+        # check the number of variables in the solution matches the number of variables in the model
+        solution = result_table.column("solution")[0].as_py()
+        objective_value = result_table.column("obj_val")[0].as_py()
+        assert solution is not None, "Solution is None"
+        assert objective_value is not None, "Objective value is None"
+        assert len(solution) == len(model_data["c"]), "Number of variables in solution does not match number of variables in model"

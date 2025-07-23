@@ -33,9 +33,10 @@ class JuliaComputeService(BaseService):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
             client_socket.connect((self.julia_ip, self.julia_port))
 
-            model_ipc_dict= model.to_pydict()
-            solver_ipc_dict = solver.to_pydict()
-            message_table = dict_to_pa_table(model_ipc_dict).append_column("solver", dict_to_pa_table(solver_ipc_dict))
+            message_dict = model.to_pydict()
+            message_dict["solver"] = solver.to_pydict()
+            message_table = dict_to_pa_table(message_dict)
+
             # turn the table to IPC bytes
             sink = pa.BufferOutputStream()
             with pa.ipc.new_stream(sink, message_table.schema) as writer:
@@ -46,6 +47,7 @@ class JuliaComputeService(BaseService):
 
             # Receive the response from the Julia service
             response = client_socket.recv(4)
+
             # first 4 bytes are the length of the response
             length_bytes = response[:4]
             result_length = int.from_bytes(length_bytes, byteorder='little', signed=True)

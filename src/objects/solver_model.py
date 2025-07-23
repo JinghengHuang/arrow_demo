@@ -6,9 +6,9 @@
 from objects.base_model import ArrowModel
 
 
-class SolverConfig(ArrowModel):
+class SolverModel(ArrowModel):
     """
-    SolverConfig: Configuration for the optimization solver
+    SolverModel: Configuration for the optimization solver
     This class provides a way to define the solver configuration, including the solver name,
     solver type, and any additional parameters needed for the solver.
     It inherits from ArrowModel to ensure compatibility with Arrow's in-memory format.
@@ -33,7 +33,7 @@ class SolverConfig(ArrowModel):
         """
         solver_name = solver_dict.get("solver_name")
         solver_type = solver_dict.get("solver_type")
-        params = solver_dict.get("params", {})
+        solver_params = solver_dict.get("solver_params", {})
 
         self.solver_name = solver_name
         if not solver_name:
@@ -41,7 +41,7 @@ class SolverConfig(ArrowModel):
         self.solver_type = solver_type
         if solver_type is None or solver_type.upper() not in ["LP", "QP"]:
             raise ValueError(f"Unsupported solver type: {solver_type}. Supported types are: LP, QP.")
-        self.params = params if params is not None else {}
+        self.solver_params = solver_params if solver_params is not None else {}
 
     def sanity_check(self) -> None:
         pass
