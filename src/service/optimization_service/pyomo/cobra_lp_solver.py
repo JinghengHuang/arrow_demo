@@ -25,8 +25,9 @@ class CobraLPSolver(BaseSolver):
             model_conf["solver_name"] = "gurobi_persistent_v2"
         if model_conf.get("solver_name").lower() == "gurobi_direct":
             model_conf["solver_name"] = "gurobi_direct_v2"
-        
-        solver_params = model_conf["params"]
+        solver_params = None
+        if "params" in model_conf:
+            solver_params = model_conf["params"]
         solver = change_cobra_solver(model_conf.get("solver_name") or "glpk")
         lp = LPProblem(self.model["A"], self.model["b"], self.model["c"], self.model["lb"], self.model["ub"], self.model["osense"], self.model["csense"])
         print("Building Model")

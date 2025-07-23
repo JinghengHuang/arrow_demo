@@ -26,7 +26,9 @@ class CobraQPSolver(BaseSolver):
         if model_conf.get("solver_name").lower() == "gurobi_direct":
             model_conf["solver_name"] = "gurobi_direct_v2"
 
-        solver_params = model_conf["params"]
+        solver_params = {}
+        if "params" in model_conf:
+            solver_params = model_conf["params"]
         solver = change_cobra_solver(model_conf.get("solver_name") or "glpk")
         qp = QPProblem(self.model["A"], self.model["G"], self.model["Q"], self.model["b"], self.model["c"], self.model["h"], self.model["lb"], self.model["osense"], self.model["ub"])
         print("Building Model")
