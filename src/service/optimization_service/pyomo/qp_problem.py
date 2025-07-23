@@ -7,6 +7,7 @@ import os
 import gc
 import time
 from utils.pyomo_utils import *
+import shutil
 
 class QPProblem:
     def __init__(self, A, G, Q, b, c, h, lb, osense, ub):
@@ -97,12 +98,13 @@ class QPProblem:
         timeout_count = 5
         if "highs" in self.solver.name.lower(): 
             opt = HiGHS(solution_file=sol_path, log_file="/dev/null", **solver_params)
-            result = opt.solve(self.model)
-            while not os.path.exists(sol_path):
-                time.sleep(sleep_time)
-                timeout_count -= 1
-                if timeout_count < 0:
-                    raise RuntimeError("HiGHS timeout, check if HiGHS are installed.")
+            try:
+                result = opt.solve(self.model, time_limit=10)
+            except Exception as e:
+                # remove tmp folder
+                if os.path.exists("./tmp"):
+                    shutil.rmtree("./tmp", )
+                raise RuntimeError("HiGHS solve failed, check HiGHS installation (QP requires separate HiGHS installation).")
         else:
             opt = SolverFactory(self.solver.name.lower())
             if solver_params is not None:
