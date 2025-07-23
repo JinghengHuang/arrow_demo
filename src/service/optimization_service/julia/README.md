@@ -1,30 +1,20 @@
 # OptimizationServer (Julia)
 
-This project implements a lightweight socket-based optimization server. It receives optimization problems (e.g. LP, QP) encoded in Arrow IPC format via TCP, solves them using JuMP and solver backends, and returns the result. The server listens for incoming socket connections and sends optimization results serialized in Arrow IPC format.
+This project implements a lightweight optimization server using [JuMP.jl](https://jump.dev/) and [iHighs.jl](https://github.com/jump-dev/HiGHS.jl). The server listens for incoming socket connections and sends optimization results serialized in Arrow IPC format.
 
 ## 📁 Project Structure
 ```
-julia/
-├── controller/ # Request listener/controller
-│ └── socket_server.jl # TCP socket server (entry controller)
-│
-├── model/ # Optimization model definitions
-│ ├── lp_model.jl
-│ └── qp_model.jl
-│
-├── service/ # Business logic and factories
-│ ├── model_factory.jl # Maps model type strings to model modules
-│ ├── solver_factory.jl # Maps solver name to JuMP optimizer
-│ └── optimization_service.jl # Core compute logic
-│
-├── utils/ # Reusable I/O and math helpers
-│ ├── io_utils.jl # Arrow serialization, TCP helpers
-│ └── sparse_matrix.jl # Sparse array converters
-│
-├── engine.jl # Project entry point
-├── Project.toml
-└── Manifest.toml
+project/
+├── Project.toml # Project dependencies (JuMP, DataFrames, etc.)
+├── Manifest.toml # Dependency lock file (auto-generated)
+├── engine.jl # Entry point to start the server
+├── optimization_server.jl # Main module: defines start_server
+└── solve.jl # Contains optimization logic
 ```
+
+- solve.jl contains the optimization model logic.
+- optimization_server.jl defines the OptimizationServer module and exports start_server().
+- engine.jl is the execution entry point that includes the server module and starts the service.
 
 
 

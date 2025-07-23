@@ -3,7 +3,9 @@ Endpoints for the optimization service API
 """
 from typing import Dict
 import pyarrow as pa
-from objects.model_factory import ModelFactory
+from objects.lp_model import LPModel
+from objects.qp_model import QPModel
+from objects.solver_config import SolverConfig
 from service.service_factory import ServiceFactory
 
 
@@ -24,7 +26,6 @@ class Endpoint:
     """
     def __init__(self):
         self.service_factory = ServiceFactory()
-        self.model_factory = ModelFactory()
 
 
     def compute(self, payload) -> Dict:
@@ -39,13 +40,16 @@ class Endpoint:
         """
         engine = payload.column("engine")[0].as_py()
         optimization_service = self.service_factory.create_service(engine)
-        solver_model = self.model_factory.create_model("solver", payload.column("solver")[0].as_py())
+        # Note: solver is a dictionary, we can access its fields directly
+        solver = SolverConfig(payload.column("solver")[0].as_py())
+        #use case when for solver_type to form model
         model_name = payload.column("model_name")[0].as_py()
-        data_model = self.model_factory.create_model(
-            solver_model.solver_type.lower(),
-            payload.column("model")[0].as_py()
-        )
-        result = optimization_service.compute(data_model, solver_model, model_name)
+        model = None
+        if solver.solver_type.lower() == "lp":
+            model = LPModel(payload.column("model")[0].as_py())
+        elif solver.solver_type.lower() == "qp":
+            model = QPModel(payload.column("model")[0].as_py())
+        result = optimization_service.compute(model, solver, model_name)
         if result.column("success")[0].as_py():
             return True, pa.RecordBatch.from_pydict({
                 "solution": [result.column("solution")[0].as_py()],
