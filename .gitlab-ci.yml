@@ -62,7 +62,7 @@ test:
     # Not using HSL for testing environment, because it requires license and stuff
     - ../configure --with-mumps-cflags=-I/usr/include/mumps_seq --with-mumps-lflags=-ldmumps_seq --without-hsl
     - make
-    - make test 
+    - make test
     - make install
 
     - ls /usr/local/lib
@@ -98,6 +98,8 @@ test:
     - sh ./scripts/startAll.sh
     - sleep 45
     - poetry run pytest --junitxml=junit.xml --timeout=10
+    - julia --project=src/service/optimization_service/julia tests/test_julia_lp.jl
+    - julia --project=src/service/optimization_service/julia tests/test_julia_qp.jl
   artifacts:
     when: always
     paths:
