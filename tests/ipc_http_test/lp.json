@@ -16,6 +16,7 @@
     "solvers": [
         {"solver_name": "Gurobi", "solver_type": "LP", "solver_params": {}},
         {"solver_name": "GLPK", "solver_type": "LP", "solver_params": {}},
+        {"solver_name": "HiGHS", "solver_type": "LP", "solver_params": {"presolve":"on", "infinite_cost":1e+18}},
         {"solver_name": "HiGHS", "solver_type": "LP", "solver_params": {}},
         {"solver_name": "MOSEK", "solver_type": "LP", "solver_params": {}},
         {"solver_name": "CSDP", "solver_type": "LP", "solver_params": {}},

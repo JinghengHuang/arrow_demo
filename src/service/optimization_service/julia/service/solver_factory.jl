@@ -54,7 +54,7 @@ optimizer = create_solver(solver_table)
 """
 function create_solver(solver_table)
     solver_name = solver_table[:solver_name]
-    solver_params = solver_table[:params]
+    solver_params = solver_table[:solver_params]
     # Convert NamedTuple to Dict with Symbol keys
     params_dict = Dict(pairs(solver_params))
 
