@@ -20,7 +20,6 @@
         {"solver_name": "MOSEK", "solver_type": "LP", "solver_params": {}},
         {"solver_name": "CSDP", "solver_type": "LP", "solver_params": {}},
         {"solver_name": "Ipopt", "solver_type": "LP", "solver_params": {}},
-        {"solver_name": "Hypatia", "solver_type": "LP", "solver_params": {}},
-        {"solver_name": "Hypatia", "solver_type": "LP", "solver_params": {"presolve": true, "dual": true, "primal": true}}
+        {"solver_name": "Hypatia", "solver_type": "LP", "solver_params": {}}
     ]
 }

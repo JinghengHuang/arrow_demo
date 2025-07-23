@@ -25,9 +25,7 @@
     },
     "solvers": [
         {"solver_name": "Gurobi", "solver_type": "QP", "solver_params": {}},
-        {"solver_name": "GLPK", "solver_type": "QP", "solver_params": {}},
         {"solver_name": "HiGHS", "solver_type": "QP", "solver_params": {}},
-        {"solver_name": "HiGHS", "solver_type": "QP", "solver_params": {"presolve": 1}},
         {"solver_name": "MOSEK", "solver_type": "QP", "solver_params": {}},
         {"solver_name": "CSDP", "solver_type": "QP", "solver_params": {}},
         {"solver_name": "Ipopt", "solver_type": "QP", "solver_params": {}},
