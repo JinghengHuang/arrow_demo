@@ -98,7 +98,7 @@ test:
     - sh ./scripts/startAll.sh > /dev/null 2>&1 &
     - sleep 60
     - nc -zv 127.0.0.1 8000 8101 65432
-    - poetry run pytest --junitxml=junit.xml --timeout=600
+    - poetry run pytest --junitxml=junit.xml --timeout=180
     - julia --project=src/service/optimization_service/julia tests/test_julia_lp.jl
     - julia --project=src/service/optimization_service/julia tests/test_julia_qp.jl
   artifacts:
