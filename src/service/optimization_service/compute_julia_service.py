@@ -3,10 +3,10 @@ JuliaComputeService: A service for computing models using Julia via IPC
 """
 import socket
 import pyarrow as pa
-from service.base_service import BaseService
+from service.optimization_service.base_opt_service import BaseOptService
 from utils.dict_to_pa_table import dict_to_pa_table
 
-class JuliaComputeService(BaseService):
+class JuliaComputeService(BaseOptService):
     """
     JuliaComputeService: A service for computing models using Julia via IPC
     This service connects to a Julia process over a socket and sends model data

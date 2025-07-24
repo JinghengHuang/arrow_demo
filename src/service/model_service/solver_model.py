@@ -3,7 +3,7 @@
     This class is used to store the configuration for the solver.
     It includes the solver name, the solver type, and any additional parameters needed for the solver
 """
-from objects.base_model import ArrowModel
+from service.model_service.base_model import ArrowModel
 
 
 class SolverModel(ArrowModel):
