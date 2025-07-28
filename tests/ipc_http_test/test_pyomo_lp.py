@@ -47,7 +47,9 @@ def test_pyomo_service():
     table = reader.read_all()
     resdict = unpack_pa_table_dict(table)
     print(resdict)
+    assert "Exception" not in str(resdict)
     assert resdict.get("status") == "optimal"
+    assert "Error" not in str(resdict)
     post = time.time()
     diff = post - pre
     print(f"Pre request: {pre}")
