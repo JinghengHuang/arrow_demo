@@ -7,7 +7,7 @@ from fastapi import Request
 from fastapi import FastAPI, status
 from fastapi.responses import Response, JSONResponse
 from fastapi.encoders import jsonable_encoder
-from controllers import Controller
+from api.controllers import Controller
 from utils.api_utils import *
 from utils.dict_to_pa_table import dict_to_pa_table, unpack_pa_table_dict
 
@@ -27,7 +27,7 @@ async def compute_json(request: Request) -> Response:
     try:
         raw = await request.json()
         table = dict_to_pa_table(raw)
-        success, result = endpoint.compute(payload=table)
+        success, result = controller.compute(payload=table)
         return_data = unpack_pa_table_dict(result)
         if success:
             return JSONResponse(
@@ -63,7 +63,7 @@ async def compute(request: Request) -> Response:
         raw = await request.body()
         reader = pa.ipc.open_stream(raw)
         table = reader.read_all()
-        success, result = endpoint.compute(payload=table)
+        success, result = controller.compute(payload=table)
         ipc_bytes = write_table_to_ipc_bytes(result)
         if success:
             return Response(

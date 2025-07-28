@@ -1,5 +1,5 @@
 import pyarrow as pa
-from objects.request_model import RequestModel
+from model.request_model import RequestModel
 
 def validate_request_input(table: pa.Table) -> bool:
     """Check if input is in the right form, based on the class RequestModel
