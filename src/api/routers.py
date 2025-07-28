@@ -1,14 +1,15 @@
 """
-Endpoints for the optimization service API
+FastAPI RESTful API for OptArrow
+This module defines the FastAPI application and its endpoints for handling computation requests.
 """
 import pyarrow as pa
 from fastapi import Request
 from fastapi import FastAPI, status
 from fastapi.responses import Response
-from controller.endpoints import Endpoint
+from api.controllers import Controller
 
 app = FastAPI()
-endpoint = Endpoint()
+controller = Controller()
 
 @app.post("/compute")
 async def compute(request: Request) -> Response:
@@ -24,7 +25,7 @@ async def compute(request: Request) -> Response:
         raw = await request.body()
         reader = pa.ipc.open_stream(raw)
         table = reader.read_all()
-        success, result = endpoint.compute(payload=table)
+        success, result = controller.compute(payload=table)
         if success:
             sink = pa.BufferOutputStream()
             with pa.ipc.new_stream(sink, result.schema) as writer:

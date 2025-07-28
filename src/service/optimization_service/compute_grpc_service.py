@@ -4,9 +4,9 @@ Service class that acts as a gRPC client between gateway and engine gRPC service
 import pyarrow as pa
 import pyarrow.flight
 from utils.dict_to_pa_table import dict_to_pa_table
-from service.base_service import BaseService
+from service.optimization_service.base_opt_service import BaseOptService
 
-class GrpcComputeService(BaseService):
+class GrpcComputeService(BaseOptService):
     """
     GrpcComputeService: gRPC client for compute service
     This service acts as a client to the gRPC compute service, allowing for

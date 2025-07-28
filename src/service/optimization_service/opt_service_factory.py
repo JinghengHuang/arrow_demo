@@ -1,12 +1,12 @@
 """
     Service factory class, build service object based on parameter
 """
-from service.base_service import BaseService
-from service.compute_grpc_service import GrpcComputeService
-from service.compute_julia_service import JuliaComputeService
+from service.optimization_service.base_opt_service import BaseOptService
+from service.optimization_service.compute_grpc_service import GrpcComputeService
+from service.optimization_service.compute_julia_service import JuliaComputeService
 
 
-class ServiceFactory():
+class OptServiceFactory():
     """
     Service factory class, build service object based on parameter
     This class provides a method to create a service instance based on the engine type.
@@ -19,7 +19,7 @@ class ServiceFactory():
             "julia": JuliaComputeService(),
         }
 
-    def create_service(self, name: str) -> BaseService:
+    def create_service(self, name: str) -> BaseOptService:
         """Create a type of concrete service
 
         Args:

@@ -56,7 +56,7 @@ class GatewayServer():
         """
         self.logger = self.setup_custom_logger(f"worker_fastAPI")
         self.logger.info("Starting worker on FastAPI")
-        uvicorn.run("controller.fastapi_restful:app",
+        uvicorn.run("api.routers:app",
                     host=self.ipaddr_http,
                     port=self.port,
                     log_level="info",
