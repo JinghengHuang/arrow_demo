@@ -2,9 +2,9 @@
 Base class for all services
 """
 
-class BaseService():
+class BaseOptService():
     """
-    BaseService: A base class for all services
+    BaseOptService: A base class for all optimization services
     This class provides a common interface for services that can be extended
     to implement specific functionality.
     It defines a compute method that should be implemented by subclasses.

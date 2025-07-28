@@ -1,4 +1,4 @@
-include("controller/socket_server.jl")
+include("api/socket_server.jl")
 
 # This is the entry point for the Julia optimization service.
 # It starts the TCP server.

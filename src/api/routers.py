@@ -1,17 +1,18 @@
 """
-Endpoints for the optimization service API
+FastAPI RESTful API for OptArrow
+This module defines the FastAPI application and its endpoints for handling computation requests.
 """
 import pyarrow as pa
 from fastapi import Request
 from fastapi import FastAPI, status
 from fastapi.responses import Response, JSONResponse
 from fastapi.encoders import jsonable_encoder
-from controller.endpoints import Endpoint
+from controllers import Controller
 from utils.api_utils import *
 from utils.dict_to_pa_table import dict_to_pa_table, unpack_pa_table_dict
 
 app = FastAPI()
-endpoint = Endpoint()
+controller = Controller()
 
 @app.post("/computeJSON")
 async def compute_json(request: Request) -> Response:

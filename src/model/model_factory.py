@@ -1,9 +1,9 @@
 """
 Model factory for creating optimization models
 """
-from objects.lp_model import LPModel
-from objects.qp_model import QPModel
-from objects.solver_model import SolverModel
+from model.lp_model import LPModel
+from model.qp_model import QPModel
+from model.solver_model import SolverModel
 
 class ModelFactory:
     _registry = {
