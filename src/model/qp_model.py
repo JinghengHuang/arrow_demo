@@ -3,7 +3,7 @@ QPModel: Quadratic Programming Model Representation using PyArrow
 """
 
 import pyarrow as pa
-from service.model_service.base_model import ArrowModel
+from model.base_model import ArrowModel
 from utils.model_sanity_check import check_arrow_coo_matrix, check_variable_bounds, check_objective_sense
 
 

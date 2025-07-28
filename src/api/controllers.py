@@ -3,7 +3,7 @@ Controller for interacting with the service to perform computations.
 """
 from typing import Dict
 import pyarrow as pa
-from service.model_service.model_factory import ModelFactory
+from model.model_factory import ModelFactory
 from service.optimization_service.opt_service_factory import OptServiceFactory
 from utils.dict_to_pa_table import dict_to_pa_table
 
