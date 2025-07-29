@@ -14,6 +14,8 @@ class OptServiceFactory():
     """
 
     def __init__(self):
+        """Create service factory
+        """
         self._service_map = {
             "pyomo": GrpcComputeService(),
             "julia": JuliaComputeService(),

@@ -14,9 +14,14 @@ class GrpcComputeService(BaseOptService):
     It uses PyArrow to serialize and deserialize data for communication.
     It provides methods to compute models using the gRPC service.
     """
-    def __init__(self):
+    def __init__(self, ip=None, port=None):
+        
         self.gRPC_ip = "127.0.0.1"
         self.gRPC_port = 8101
+        if ip is not None:
+            self.gRPC_ip = ip
+        if port is not None:
+            self.gRPC_port = port
         super().__init__()
 
 

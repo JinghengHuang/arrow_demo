@@ -1,5 +1,5 @@
-from service.optimization_service.pyomo.cobra_qp_solver import CobraQPSolver
-
+from service.optimization_service.python.pyomo.cobra_qp_solver import CobraQPSolver
+import pytest
 # Use Server to test:
 
 # Quadratic term Q as native Python dict
@@ -52,124 +52,21 @@ model = {
         "lb": lb,
         "ub": ub,
         "osense": osense}
-    
-# def test_pyomo():
-#     url = "http://127.0.0.1:8000/compute"
 
-    
-#     model_name ="test_qp"
-#     engine = "pyomo"
-#     solver_name = "HiGHS"
-#     solver_type = "QP"
-#     solver_params = {"presolve": True, "dual": True, "primal": True}
-    
-#     ipc_dict = {
-#         "model" :model,
-#         "model_name": model_name,
-#         "engine": engine,
-#         "solver": {
-#             "solver_name": solver_name,
-#             "solver_type": solver_type,
-#             "solver_params": solver_params
-#         }
-#     }
-#     ipc_table = dict_to_pa_table(ipc_dict)
-    
-#     # convert to ipc stream
-#     sink = pa.BufferOutputStream()
-#     with pa.ipc.new_stream(sink, ipc_table.schema) as writer:
-#         writer.write(ipc_table)
-        
-    
-#     # converts to bytes
-#     ipc_bytes = sink.getvalue().to_pybytes()
-
-#     # set headers for the request
-#     headers = {
-#         "Content-Type": "application/vnd.apache.arrow.stream"
-#     }
-
-#     pre = time.time()
-#     # send the request
-#     response = requests.post(url, data=ipc_bytes, headers=headers)
-#     assert "Error" not in str(response.content)
-#     print(str(response.content))
-#     post = time.time()
-#     diff = post - pre
-#     print(f"Pre request: {pre}")
-#     print(f"Post request: {post}")
-#     print(f"Time diff: {diff}")
-
+solvers = [
+    pytest.param({"solver_name": "Gurobi", "solver_type": "QP", "solver_params": {}}, marks=pytest.mark.basic, id="Gurobi"),
+    pytest.param({"solver_name": "HiGHS", "solver_type": "QP", "solver_params": {}}, marks=pytest.mark.basic, id="HiGHS"),
+    pytest.param({"solver_name": "HiGHS", "solver_type": "QP", "solver_params": {"presolve": 1}}, marks=pytest.mark.basic, id="HiGHS w/params"),
+    pytest.param({"solver_name": "Ipopt", "solver_type": "QP", "solver_params": {}}, marks=pytest.mark.basic, id="Ipopt")
+    # {"solver_name": "Hypatia", "solver_type": "QP", "solver_params": {}}
+]
 # No server
-def test_pyomo_qp_highs():
-    
-    # Stress test
-    model["solver"] = {
-        "solver_name": "HiGHS",
-        "solver_type": "QP",
-        # some params not supported on QP, see https://ergo-code.github.io/HiGHS/dev/options/definitions/#option-definitions for lists of supported params
-        "params": {"presolve": "on", "time_limit": 10, "parallel": "on"}
-    }
+@pytest.mark.parametrize("solver", solvers)
+def test_pyomo_qp_no_server(solver):
+    model["solver"] = solver
     solver = CobraQPSolver()
     result = solver.run(model)
-    assert "Exception" not in str(result)
-    assert "Error" not in str(result)
-    assert "error" not in str(result)
-    print(result)
-
-# Glpk doesn't support qp, so no test for this
-# def test_pyomo_qp_glpk():
-    
-#     # Stress test
-#     model["solver"] = {
-#         "solver_name": "glpk",
-#         "solver_type": "QP",
-#         "solver_params": {"presolve": True, "dual": True, "primal": True}
-#     }
-#     solver = CobraQPSolver()
-#     result = solver.run(model)
-#     assert "Exception" not in str(result)
-#     assert "Error" not in str(result)
-#     print(result)
-
-def test_pyomo_qp_gurobi():
-    
-    # Stress test
-    model["solver"] = {
-        "solver_name": "gurobi",
-        "solver_type": "QP",
-        "params": {"presolve": True, "quad": 1}
-    }
-    solver = CobraQPSolver()
-    result = solver.run(model)
-    assert "Exception" not in str(result)
-    assert "Error" not in str(result)
-    print(result)
-
-# Maybe cplex in the future, but not now.
-# def test_pyomo_qp_cplex():
-    
-#     # Stress test
-#     model["solver"] = {
-#         "solver_name": "cplex",
-#         "solver_type": "QP",
-#         "solver_params": {"presolve": True, "dual": True, "primal": True}
-#     }
-#     solver = CobraQPSolver()
-#     result = solver.run(model)
-#     assert "Exception" not in str(result)
-#     assert "Error" not in str(result)
-#     print(result)
-
-def test_pyomo_qp_ipopt():
-    
-    # Stress test
-    model["solver"] = {
-        "solver_name": "ipopt",
-        "solver_type": "QP",
-    }
-    solver = CobraQPSolver()
-    result = solver.run(model)
+    assert True == result.get("success")
     assert "Exception" not in str(result)
     assert "Error" not in str(result)
     print(result)

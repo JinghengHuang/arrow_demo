@@ -14,9 +14,13 @@ class JuliaComputeService(BaseOptService):
     a specified IP and port.
     It uses PyArrow for serialization and deserialization of model data.
     """
-    def __init__(self):
+    def __init__(self, ip=None, port=None):
         self.julia_ip = "127.0.0.1"
         self.julia_port = 65432
+        if ip is not None:
+            self.julia_ip = ip
+        if port is not None:
+            self.julia_port = port
         super().__init__()
 
 
