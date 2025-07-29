@@ -8,7 +8,7 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 import pyarrow as pa
 import pyarrow.flight
-from service.optimization_service.pyomo.solver_factory import SolverFactory
+from service.optimization_service.python.pyomo.solver_factory import SolverFactory
 from utils.dict_to_pa_table import dict_to_pa_table
 from utils.dict_to_pa_table import unpack_pa_table_dict
 

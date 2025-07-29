@@ -107,7 +107,7 @@ class QPProblem:
                 raise RuntimeError("HiGHS solve failed, check HiGHS installation (QP requires separate HiGHS installation).")
         else:
             opt = SolverFactory(self.solver.name.lower())
-            if solver_params is not None:
+            if solver_params is not None and solver_params != {}:
                 result = opt.solve(self.model, solver_options=solver_params)
             else:
                 result = opt.solve(self.model)

@@ -76,7 +76,7 @@ class LPProblem:
         if self.model is None or self.solver is None:
             raise RuntimeError("Model not built or solver not assigned.")
         opt = SolverFactory(self.solver.name.lower())
-        if solver_params is not None:
+        if solver_params is not None and solver_params != {}:
             result = opt.solve(self.model, tee=False, solver_options=solver_params)
         else:
             result = opt.solve(self.model, tee=False)
