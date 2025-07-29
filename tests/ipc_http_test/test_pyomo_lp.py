@@ -54,6 +54,7 @@ def test_pyomo_service(solver):
     resdict = unpack_pa_table_dict(table)
     print(resdict)
     assert "Exception" not in str(resdict)
+    assert resdict.get("obj_val") > 0
     assert resdict.get("status") == "optimal"
     assert "Error" not in str(resdict)
     post = time.time()
@@ -88,6 +89,7 @@ def test_pyomo_service_json(solver):
     cont = response.json()
     print(cont)
     assert "Exception" not in str(cont)
+    assert cont.get("obj_val") > 0
     assert cont.get("status") == "optimal"
     assert "Error" not in str(cont)
     post = time.time()
@@ -105,6 +107,7 @@ def test_pyomo_lp_no_server(solver):
     result = solver.run(dict)
     print(result)
     assert result.get("success") is not False
+    assert result.get("obj_val") > 0
     assert "Exception" not in str(result)
     assert "Error" not in str(result)
     assert result.get("solution") is not None

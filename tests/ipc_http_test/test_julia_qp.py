@@ -92,6 +92,7 @@ def test_julia_flow(solver):
         # check the number of variables in the solution matches the number of variables in the model
         solution = result_table.column("solution")[0].as_py()
         objective_value = result_table.column("obj_val")[0].as_py()
+        print(solution, objective_value)
         assert solution is not None, "Solution is None"
         assert objective_value is not None, "Objective value is None"
         assert len(solution) == len(model_data["c"]), "Number of variables in solution does not match number of variables in model"
