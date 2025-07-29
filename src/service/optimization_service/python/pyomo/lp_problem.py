@@ -86,8 +86,6 @@ class LPProblem:
             print("Solved.")
             self.solution = [value(self.model.x[i]) for i in self.model.I]
             self.objective_value = value(self.model.obj)
-            if self.osense == 1:
-                self.objective_value = -self.objective_value
         else:
             self.solution = "Infeasible"
             self.objective_value = None
