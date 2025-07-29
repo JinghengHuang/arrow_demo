@@ -47,7 +47,46 @@ def test_pyomo_service():
     table = reader.read_all()
     resdict = unpack_pa_table_dict(table)
     print(resdict)
+    assert "Exception" not in str(resdict)
     assert resdict.get("status") == "optimal"
+    assert "Error" not in str(resdict)
+    post = time.time()
+    diff = post - pre
+    print(f"Pre request: {pre}")
+    print(f"Post request: {post}")
+    print(f"Time diff: {diff}")
+
+# As json data, in JSON
+def test_pyomo_service_json():
+    if ncheck.check_socket("127.0.0.1", 8000) is False:
+        pytest.skip("Server is not started")
+    url = "http://127.0.0.1:8000/computeJSON"
+
+    ipc_dict = {
+        "model" : dict,
+        "model_name": "e_coli_core",
+        "engine": "pyomo",
+        "solver": {
+            "solver_name": "Highs",
+            "solver_type": "LP",
+            "solver_params": {"presolve": True, "dual": True, "primal": True}
+        }
+    }
+
+    # set headers for the request
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    pre = time.time()
+    # send the request
+    response = requests.post(url, json=ipc_dict, headers=headers)
+    
+    cont = response.json()
+    print(cont)
+    assert "Exception" not in str(cont)
+    assert cont.get("status") == "optimal"
+    assert "Error" not in str(cont)
     post = time.time()
     diff = post - pre
     print(f"Pre request: {pre}")

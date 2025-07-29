@@ -104,6 +104,7 @@ test:
   artifacts:
     when: always
     paths:
-      - ./
+      - ./junit.xml
     reports:
       junit: junit.xml
+    expire_in: 1 week
