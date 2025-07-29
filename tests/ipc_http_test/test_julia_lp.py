@@ -48,9 +48,7 @@ def test_julia_flow(solver):
 
     post = time.time()
     diff = post - pre
-    print(f"Pre request: {pre}")
-    print(f"Post request: {post}")
-    print(f"Time diff: {diff}")
+    print(f"It takes {diff:.2f} seconds to get the response from the server")
 
     # assert , if solver is Gurobi and Mosek, the response should be 500 due to missing license
     if solver["solver_name"] in ["Gurobi", "MOSEK"]:
@@ -71,5 +69,6 @@ def test_julia_flow(solver):
         objective_value = result_table.column("obj_val")[0].as_py()
         assert solution is not None, "Solution is None"
         assert objective_value is not None, "Objective value is None"
+        print(f"====Objective value: {objective_value} for solver {solver['solver_name']}")
         # check the number of variables in the solution matches the number of variables in the model
         assert len(solution) == len(model_data["c"]), "Number of variables in solution does not match number of variables in model"
