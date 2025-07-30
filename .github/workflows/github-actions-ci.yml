@@ -73,6 +73,7 @@ jobs:
             julia --project=./src/service/optimization_service/julia -e "import Pkg; Pkg.instantiate()"
 
             cd /__w/arrow_demo/arrow_demo
+            poetry install --no-interaction --no-ansi --no-root
 
       - name: Run tests
         run: |
