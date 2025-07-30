@@ -8,6 +8,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+       run:
+         working-directory: /server
     container:
       image: python:3.12-slim
 
@@ -60,10 +63,10 @@ jobs:
             mv julia-1.11.5 /opt/julia
             ln -s /opt/julia/bin/julia /usr/bin/julia
             julia --version
-            cd /__w/arrow_demo/arrow_demo
+            cd /server
             julia --project=./src/service/optimization_service/julia -e "import Pkg; Pkg.instantiate()"
 
-            cd /__w/arrow_demo/arrow_demo
+            cd /server
             curl -sSL https://install.python-poetry.org | python3 -
             export PATH="$HOME/.local/bin:$PATH"
             poetry config virtualenvs.create true
