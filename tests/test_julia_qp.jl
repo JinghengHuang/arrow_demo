@@ -59,6 +59,7 @@ for data in data_dicts
         end
     else
         termination_status, objective_value, solution = OptimizationService.optimize(data)
+        println("=========Objective Value: $objective_value for solver $solver_name")
         @assert length(solution) == length(data[:c]) "Solution length mismatch: expected $(length(data[:c])), got $(length(solution))"
     end
 end

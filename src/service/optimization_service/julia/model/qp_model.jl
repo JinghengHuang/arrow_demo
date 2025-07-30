@@ -70,14 +70,14 @@ function build_jump_model(data)
     lb = Vector{Float64}(data[:lb])
     ub = Vector{Float64}(data[:ub])
     osense_str = data[:osense]
-    osense = osense_str == "max" ? -1 : 1
+    osense = osense_str == "max" ? MOI.MAX_SENSE : MOI.MIN_SENSE
 
     Q = to_sparse(Q_data)
     A = to_sparse(A_data)
     G = to_sparse(G_data)
 
     # Build model
-    return buildqp(Q * osense, c * osense, A, b, G, h, lb, ub)
+    return buildqp(osense, Q, c, A, b, G, h, lb, ub)
 end
 
 
@@ -121,13 +121,13 @@ ub = [10.0, 10.0]
 model, x, Q, c = buildqp(Q, c, A, b, G, h, lb, ub)
 ```
 """
-function buildqp(Q, c, A, b, G, h, lb, ub)
+function buildqp(osense, Q, c, A, b, G, h, lb, ub)
     n = length(c)
     model = Model()
 
     @variable(model, lb[i] <= x[i=1:n] <= ub[i])
 
-    @objective(model, Min, 0.5 * dot(x, Q * x) + dot(c, x))
+    @objective(model, osense, 0.5 * dot(x, Q * x) + dot(c, x))
 
     if size(A, 1) > 0
         @constraint(model, A * x .== b)
