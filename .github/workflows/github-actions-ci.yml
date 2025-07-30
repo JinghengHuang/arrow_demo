@@ -60,10 +60,10 @@ jobs:
             mv julia-1.11.5 /opt/julia
             ln -s /opt/julia/bin/julia /usr/bin/julia
             julia --version
-            cd /builds/recon4imd/cobra_arrow
+            cd /__w/arrow_demo/arrow_demo
             julia --project=./src/service/optimization_service/julia -e "import Pkg; Pkg.instantiate()"
 
-            cd /builds/recon4imd/cobra_arrow
+            cd /__w/arrow_demo/arrow_demo
             curl -sSL https://install.python-poetry.org | python3 -
             export PATH="$HOME/.local/bin:$PATH"
             poetry config virtualenvs.create true
