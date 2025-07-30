@@ -54,10 +54,10 @@ model = {
         "osense": osense}
 
 solvers = [
-    pytest.param({"solver_name": "Gurobi", "solver_type": "QP", "solver_params": {}}, marks=pytest.mark.basic, id="Gurobi"),
-    pytest.param({"solver_name": "HiGHS", "solver_type": "QP", "solver_params": {}}, marks=pytest.mark.basic, id="HiGHS"),
-    pytest.param({"solver_name": "HiGHS", "solver_type": "QP", "solver_params": {"presolve": 1}}, marks=pytest.mark.basic, id="HiGHS w/params"),
-    pytest.param({"solver_name": "Ipopt", "solver_type": "QP", "solver_params": {}}, marks=pytest.mark.basic, id="Ipopt")
+    pytest.param({"solver_name": "Gurobi", "solver_type": "QP", "solver_params": {}}, id="Gurobi"),
+    pytest.param({"solver_name": "HiGHS", "solver_type": "QP", "solver_params": {}}, id="HiGHS"),
+    pytest.param({"solver_name": "HiGHS", "solver_type": "QP", "solver_params": {"presolve": 1}}, id="HiGHS w/params"),
+    pytest.param({"solver_name": "Ipopt", "solver_type": "QP", "solver_params": {}}, id="Ipopt")
     # {"solver_name": "Hypatia", "solver_type": "QP", "solver_params": {}}
 ]
 # No server
