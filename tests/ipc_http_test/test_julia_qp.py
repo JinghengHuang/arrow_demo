@@ -50,9 +50,7 @@ def test_julia_flow(solver):
 
     post = time.time()
     diff = post - pre
-    print(f"Pre request: {pre}")
-    print(f"Post request: {post}")
-    print(f"Time diff: {diff}")
+    print(f"It takes {diff:.2f} seconds to get the response from the server")
 
 # test_julia_flow()
 
@@ -88,10 +86,10 @@ def test_julia_flow(solver):
         assert isinstance(result_table, pa.Table), "Response is not a valid IPC stream"
         assert "solution" in result_table.column_names, "Response does not contain 'solution' column"
         assert result_table.num_rows > 0, "Response table is empty"
-        print(f"Test passed for solver: {solver['solver_name']}")
         # check the number of variables in the solution matches the number of variables in the model
         solution = result_table.column("solution")[0].as_py()
         objective_value = result_table.column("obj_val")[0].as_py()
         assert solution is not None, "Solution is None"
         assert objective_value is not None, "Objective value is None"
+        print(f"====Objective value: {objective_value} for solver {solver['solver_name']}")
         assert len(solution) == len(model_data["c"]), "Number of variables in solution does not match number of variables in model"

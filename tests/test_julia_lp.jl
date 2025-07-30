@@ -43,7 +43,7 @@ for data in data_dicts
         catch e
             @assert occursin("license", lowercase(string(e))) "Expected 'license' in error message, but got: $(e)"
         end
-    elseif solver_name == "HYPATIA" && !isempty(solver_params)
+    elseif solver_name == "HYPATIA" && get(solver_params, "presolve", nothing) !== nothing
         try
             termination_status, objective_value, solution = OptimizationService.optimize(data)
         catch e
@@ -51,6 +51,7 @@ for data in data_dicts
         end
     else
         termination_status, objective_value, solution = OptimizationService.optimize(data)
+        println("=========Objective Value: $objective_value for solver $solver_name")
         @assert length(solution) == length(data[:c]) "Solution length mismatch: expected $(length(data[:c])), got $(length(solution))"
     end
 end

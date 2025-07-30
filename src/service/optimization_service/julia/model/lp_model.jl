@@ -5,6 +5,7 @@ It includes functions to build a JuMP model from problem data and to set up the 
 module LPModel
 
 using SparseArrays
+using LinearAlgebra
 using JuMP
 include("../utils/sparse_matrix.jl")
 
@@ -56,14 +57,14 @@ function build_jump_model(data)
     ub = Vector{Float64}(data[:ub])
     csense_strs = Vector{String}(data[:csense])
     osense_str = data[:osense]  # e.g. "max"
-    osense = osense_str == "max" ? -1 : 1  # 1 for min which is JuMP default, -1 for max
+    osense = osense_str == "max" ? MOI.MAX_SENSE : MOI.MIN_SENSE
 
     A = to_sparse(A_data)
     # sense_map = Dict("E" => '=', "G" => '≥', "L" => '≤')
     sense_map = Dict("E" => '=', "G" => '>', "L" => '<')
     csense = [sense_map[c] for c in csense_strs]
 
-    return buildlp(c * osense, A, csense, b, lb, ub)
+    return buildlp(osense, c, A, csense, b, lb, ub)
 end
 
 
@@ -102,11 +103,11 @@ u = [10.0, 10.0]
 model, x, c = buildlp(c, A, sense, b, l, u)
 ```
 """
-function buildlp(c, A, sense, b, l, u)
+function buildlp(osense, c, A, sense, b, l, u)
     N = length(c)
     model = Model()
     x = @variable(model, l[i] <= x[i=1:N] <= u[i])
-    @objective(model, Min, c' * x)
+    @objective(model, osense, dot(c, x))
     eq_rows, ge_rows, le_rows = sense .== '=', sense .== '>', sense .== '<'
     @constraint(model, A[eq_rows, :] * x .== b[eq_rows])
     @constraint(model, A[ge_rows, :] * x .>= b[ge_rows])
