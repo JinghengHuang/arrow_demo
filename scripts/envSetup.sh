@@ -60,10 +60,9 @@ PATH=$PATH:/opt/highs/HiGHS/build/bin
 # Julia
 echo "Installing Julia"
 cd /tmp
-echo https://julialang2eastus2.blob.core.windows.net/julialang2/bin/linux/x64/${JULIA_VERSION:0:4}/julia-${JULIA_VERSION}-linux-x86_64.tar.gz
-wget https://julialang2eastus2.blob.core.windows.net/julialang2/bin/linux/x64/${JULIA_VERSION:0:4}/julia-${JULIA_VERSION}-linux-x86_64.tar.gz
-tar -xzf julia-${JULIA_VERSION}-linux-x86_64.tar.gz
-mv julia-${JULIA_VERSION} /opt/julia
+wget https://julialang2eastus2.blob.core.windows.net/julialang2/bin/linux/x64/1.11/julia-1.11.5-linux-x86_64.tar.gz
+tar -xzf julia-1.11.5-linux-x86_64.tar.gz
+mv julia-1.11.5 /opt/julia
 ln -s /opt/julia/bin/julia /usr/bin/julia
 julia --version
 cd $PROJ_HOME
