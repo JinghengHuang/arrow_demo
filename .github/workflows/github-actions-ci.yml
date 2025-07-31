@@ -87,3 +87,17 @@ jobs:
             poetry run pytest --junitxml=junit.xml --timeout=180
             julia --project=src/service/optimization_service/julia tests/test_julia_lp.jl
             julia --project=src/service/optimization_service/julia tests/test_julia_qp.jl
+
+      - name: Test Summary
+        uses: test-summary/action@v2
+        with:
+          paths: "junit.xml"
+          output: test-summary.md
+        if: always()
+
+      - name: Upload test summary
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-summary
+          path: test-summary.md
+        if: always()
