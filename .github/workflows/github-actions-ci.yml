@@ -26,7 +26,57 @@ jobs:
 
       - name: Set up Poetry and install dependencies
         run: |
-            sh ./scripts/envSetup.sh
+            ls
+            pwd
+            apt-get update && apt-get install -y curl
+            apt-get install -y libglpk-dev glpk-utils
+            glpsol --version
+            apt-get install -y gfortran netcat-traditional gcc  g++  make  wget  unzip  pkg-config  liblapack-dev  libblas-dev  libtool  coinor-libipopt-dev  build-essential  git  cmake  python3-dev  python3-pip  libopenblas-dev  libmumps-seq-dev  libmetis-dev
+            mkdir /opt/ipopt && cd /opt/ipopt
+            git clone https://github.com/coin-or/Ipopt.git
+            cd Ipopt
+            mkdir ThirdParty && cd ThirdParty
+            git clone https://github.com/coin-or-tools/ThirdParty-Mumps.git
+            cd ThirdParty-Mumps && ./get.Mumps
+            ./configure
+            make && make install
+            cd /opt/ipopt/Ipopt/ThirdParty
+            git clone https://github.com/coin-or-tools/ThirdParty-ASL.git
+            cd ThirdParty-ASL && ./get.ASL
+            ./configure
+            make && make install
+            cd /opt/ipopt/Ipopt
+            mkdir build && cd build
+            ../configure --with-mumps-cflags=-I/usr/include/mumps_seq --with-mumps-lflags=-ldmumps_seq --without-hsl
+            make
+            make test
+            make install
+
+            ls /usr/local/lib
+            find /usr/local/lib -name libipoptamplinterface.*
+            find / -name ipopt
+            LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+            cd /opt
+            mkdir highs && cd highs
+            git clone https://github.com/ERGO-Code/HiGHS.git && cd HiGHS
+            cmake -S . -B build
+            cmake --build build
+            cd build && ctest
+            PATH=$PATH:/opt/highs/HiGHS/build/bin
+            cd /tmp
+            wget https://julialang2eastus2.blob.core.windows.net/julialang2/bin/linux/x64/1.11/julia-1.11.5-linux-x86_64.tar.gz
+            tar -xzf julia-1.11.5-linux-x86_64.tar.gz
+            mv julia-1.11.5 /opt/julia
+            ln -s /opt/julia/bin/julia /usr/bin/julia
+            julia --version
+            cd /__w/arrow_demo/arrow_demo
+            julia --project=./src/service/optimization_service/julia -e "import Pkg; Pkg.instantiate()"
+
+            cd /__w/arrow_demo/arrow_demo
+            poetry install --no-interaction --no-ansi --no-root
+            echo "export LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH:/usr/local/lib\"" >> /etc/profile.d/myenv.sh
+            echo "export PATH=\"$PATH:/opt/highs/HiGHS/build/bin:$HOME/.local/bin\"" >> /etc/profile.d/myenv.sh
+            echo "export PYTHONPATH=$PWD" >> /etc/profile.d/myenv.sh
 
       - name: Run tests
         run: |

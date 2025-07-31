@@ -1,6 +1,6 @@
 #!/bin/bash
-export PROJ_HOME=$PWD
-export PYTHONFAULTHANDLER=1 \
+ENV PROJ_HOME=$PWD
+ENV PYTHONFAULTHANDLER=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONHASHSEED=random \
     PIP_NO_CACHE_DIR=off \
@@ -8,12 +8,12 @@ export PYTHONFAULTHANDLER=1 \
     PIP_DEFAULT_TIMEOUT=100 \
     # Poetry's configuration:
     POETRY_NO_INTERACTION=1
-export JULIA_VERSION="1.11.5"
-export POETRY_VERSION="2.1.3"
-export PYTHONUNBUFFERED=1
-export IPOPT_VERSION="3.14.0"
-export PATH="$HOME/.local/bin:$PATH"
-export PYTHONPATH=$PWD
+ENV JULIA_VERSION="1.11.5"
+ENV POETRY_VERSION="2.1.3"
+ENV PYTHONUNBUFFERED=1
+ENV IPOPT_VERSION="3.14.0"
+ENV PATH="$HOME/.local/bin:$PATH"
+ENV PYTHONPATH=$PWD
 
 echo "Start installing dependencies..."
 echo $PROJ_HOME
@@ -60,9 +60,9 @@ PATH=$PATH:/opt/highs/HiGHS/build/bin
 # Julia
 echo "Installing Julia"
 cd /tmp
-wget https://julialang2eastus2.blob.core.windows.net/julialang2/bin/linux/x64/1.11/julia-1.11.5-linux-x86_64.tar.gz
-tar -xzf julia-1.11.5-linux-x86_64.tar.gz
-mv julia-1.11.5 /opt/julia
+wget https://julialang-s3.julialang.org/bin/linux/x64/${JULIA_VERSION:0:4}/julia-$JULIA_VERSION-linux-x86_64.tar.gz
+tar -xzf julia-$JULIA_VERSION-linux-x86_64.tar.gz
+mv julia-$JULIA_VERSION /opt/julia
 ln -s /opt/julia/bin/julia /usr/bin/julia
 julia --version
 cd $PROJ_HOME
