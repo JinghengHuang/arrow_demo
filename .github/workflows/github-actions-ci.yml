@@ -95,9 +95,20 @@ jobs:
           output: test-summary.md
         if: always()
 
-      - name: Upload test summary
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-summary
-          path: test-summary.md
-        if: always()
+      - name: Update README
+        run: |
+          START="<!-- TEST-RESULTS-START -->"
+          END="<!-- TEST-RESULTS-END -->"
+          RESULTS=$(cat test-summary.md)
+          sed -i "/$START/,/$END/{/$START/{p; r test-summary.md
+          }; /$END/p; d}" README.md
+          
+      - name: Commit and push updated README
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git add README.md
+          git commit -m "Update test results in README" || echo "No changes to commit"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

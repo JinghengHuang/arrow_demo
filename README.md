@@ -1,5 +1,10 @@
 # Apache Flight gRPC Server / FastAPI server gateway
 
+## Test Results
+
+<!-- TEST-RESULTS-START -->
+<!-- TEST-RESULTS-END -->
+
 A framework for Apache Flight gRPC Server / FastAPI server gateway
 
 Contains OptArrow processing engine(implemented using Pyomo and Julia) and gateway service for request handling.
