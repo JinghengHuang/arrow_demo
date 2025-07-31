@@ -1,4 +1,20 @@
 #!/bin/bash
+export PROJ_HOME=$PWD
+export PYTHONFAULTHANDLER=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONHASHSEED=random \
+    PIP_NO_CACHE_DIR=off \
+    PIP_DISABLE_PIP_VERSION_CHECK=on \
+    PIP_DEFAULT_TIMEOUT=100 \
+    # Poetry's configuration:
+    POETRY_NO_INTERACTION=1
+export JULIA_VERSION="1.11.5"
+export POETRY_VERSION="2.1.3"
+export PYTHONUNBUFFERED=1
+export IPOPT_VERSION="3.14.0"
+export PATH="$HOME/.local/bin:$PATH"
+export PYTHONPATH=$PWD
+
 echo "Start installing dependencies..."
 echo $PROJ_HOME
 echo "Installing Solvers(GLPK, IPOPT, HIGHS)"
