@@ -81,7 +81,6 @@ jobs:
 
       - name: Run tests
         run: |
-            source /etc/profile.d/myenv.sh
             sh ./scripts/startAll.sh > /dev/null 2>&1 &
             sleep 60
             nc -zv 127.0.0.1 8000 8101 65432
