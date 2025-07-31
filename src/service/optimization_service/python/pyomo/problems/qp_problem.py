@@ -7,9 +7,10 @@ import os
 import gc
 import time
 from utils.pyomo_utils import *
+from service.optimization_service.python.pyomo.base_problem import BaseProblem
 import shutil
 
-class QPProblem:
+class QPProblem(BaseProblem):
     def __init__(self, A, G, Q, b, c, h, lb, osense, ub):
         if isinstance(A, dict) and all(k in A for k in ("row", "col", "val")):
             # Convert to dense
@@ -47,7 +48,7 @@ class QPProblem:
         self.objective_value = None
         self.status = None
 
-    def build_qp(self, solver: SolverConfig):
+    def build(self, solver: SolverConfig):
         model = ConcreteModel()
                 
         n = self.c.shape[0]

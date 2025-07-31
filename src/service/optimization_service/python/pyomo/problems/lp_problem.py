@@ -5,8 +5,9 @@ import pyarrow.compute as pc
 import os
 import gc
 from utils.pyomo_utils import *
+from service.optimization_service.python.pyomo.base_problem import BaseProblem
 
-class LPProblem:
+class LPProblem(BaseProblem):
     def __init__(self, S, b, c, lb, ub, osense, csense):
         if isinstance(S, dict) and all(k in S for k in ("row", "col", "val")):
             # Convert to dense
@@ -30,7 +31,7 @@ class LPProblem:
         self.objective_value = None
         self.status = None
 
-    def build_lp(self, solver: SolverConfig):
+    def build(self, solver: SolverConfig):
         model = ConcreteModel()
                 
         n = self.c.shape[0]

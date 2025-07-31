@@ -1,7 +1,7 @@
 """
 This module implements a solver for quadratic programming problems using the Cobra QP solver.
 """
-from service.optimization_service.python.pyomo.qp_problem import change_cobra_solver, QPProblem
+from service.optimization_service.python.pyomo.problems.qp_problem import change_cobra_solver, QPProblem
 from service.optimization_service.python.pyomo.solver import BaseSolver
 
 class CobraQPSolver(BaseSolver):
@@ -33,7 +33,7 @@ class CobraQPSolver(BaseSolver):
         qp = QPProblem(self.model["A"], self.model["G"], self.model["Q"], self.model["b"], self.model["c"], self.model["h"], self.model["lb"], self.model["osense"], self.model["ub"])
         print("Building Model")
         try:
-            qp.build_qp(solver)
+            qp.build(solver)
             qp.solve(solver_params)
             return {
                 "success": True,
