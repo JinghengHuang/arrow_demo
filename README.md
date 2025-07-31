@@ -1,7 +1,5 @@
 # Apache Flight gRPC Server / FastAPI server gateway
 
-## Test Results
-
 <!-- TEST-RESULTS-START -->
 <!-- TEST-RESULTS-END -->
 

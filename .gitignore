@@ -207,3 +207,4 @@ __marimo__/
 junit.xml
 .DS_Store
 arrow_gateway_engine.egg-info
+testdata
